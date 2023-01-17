@@ -3,6 +3,7 @@
  *
  * Copyright (c) 2021 Raspberry Pi (Trading) Ltd.
  * Copyright (c) 2021 Peter Lawrence
+ * Copyright (c) 2023 Kai Geissdoerfer (Nessie Circuits)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
