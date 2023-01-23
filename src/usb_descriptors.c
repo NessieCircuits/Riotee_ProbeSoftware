@@ -27,8 +27,9 @@
  */
 
 #include "get_serial.h"
-#include "rioteeprobe_config.h"
 #include "tusb.h"
+
+#include "rioteeprobe_config.h"
 
 //--------------------------------------------------------------------+
 // Device Descriptors
@@ -42,9 +43,9 @@ tusb_desc_device_t const desc_device = {
     .bDeviceProtocol = 0x00,
     .bMaxPacketSize0 = CFG_TUD_ENDPOINT0_SIZE,
 
-    .idVendor = 0x2E8A,  // Pi
-    .idProduct = 0x000c, // CMSIS-DAP adapter
-    .bcdDevice = 0x0101, // Version 01.01
+    .idVendor = PROBE_USB_VID,  // Pi
+    .idProduct = PROBE_USB_PID, // CMSIS-DAP adapter
+    .bcdDevice = 0x0101,        // Version 01.01
     .iManufacturer = 0x01,
     .iProduct = 0x02,
     .iSerialNumber = 0x03,

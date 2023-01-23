@@ -3,6 +3,17 @@ cmake_minimum_required(VERSION 3.12)
 include(pico_sdk_import.cmake)
 
 set(FREERTOS_KERNEL_PATH ${CMAKE_CURRENT_LIST_DIR}/freertos)
+
+set(PICO_BOARD_HEADER_DIRS ${CMAKE_CURRENT_LIST_DIR}/boards)
+
+if (DEFINED ENV{PICO_BOARD})
+        set(PICO_BOARD $ENV{PICO_BOARD})
+        message("Using PICO_BOARD from environment ('${PICO_SDK_PATH}')")
+else ()
+        set(PICO_BOARD "riotee_probe")
+        message("Using default PICO_BOARD ${PICO_BOARD}")
+endif()
+
 include(FreeRTOS_Kernel_import.cmake)
 
 project(rioteeprobe)

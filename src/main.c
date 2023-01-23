@@ -56,47 +56,22 @@
 static TaskHandle_t dap_taskhandle, sbw_taskhandle, tud_taskhandle;
 static MessageBufferHandle_t dap_req_buf, sbw_req_buf;
 
-static SemaphoreHandle_t sbw_uarttx_mutex;
-static SemaphoreHandle_t swd_uartrx_mutex;
+/* Protects access to programming hardware */
+static SemaphoreHandle_t programming_mutex;
 
-static SemaphoreHandle_t programming_sem;
-
-void programming_enable(void) {
-  xSemaphoreGive(programming_sem);
+int programming_enable(void) {
+  if (xSemaphoreTake(programming_mutex, 0) != pdTRUE)
+    return -1;
   gpio_put(PROBE_PIN_TARGET_POWER, 1);
-  gpio_put(PROBE_PIN_TRANS_CLOCK_EN, 1);
+  gpio_put(PROBE_PIN_TRANS_PROG_EN, 1);
+  return 0;
 }
 
 void programming_disable(void) {
-  xSemaphoreTake(programming_sem, 0);
-  if (uxSemaphoreGetCount(programming_sem) == 0) {
-    gpio_put(PROBE_PIN_TARGET_POWER, 0);
-    gpio_put(PROBE_PIN_TRANS_CLOCK_EN, 0);
-  }
-}
 
-int swd_uartrx_take(void) {
-  if (xSemaphoreTake(swd_uartrx_mutex, 0) != pdTRUE)
-    return -1;
-  gpio_put(PROBE_PIN_TRANS_SWD_UARTRX_EN, 1);
-  return 0;
-}
-
-void swd_uartrx_give(void) {
-  gpio_put(PROBE_PIN_TRANS_SWD_UARTRX_EN, 0);
-  xSemaphoreGive(swd_uartrx_mutex);
-}
-
-int sbw_uarttx_take(void) {
-  if (xSemaphoreTake(sbw_uarttx_mutex, 0) != pdTRUE)
-    return -1;
-  gpio_put(PROBE_PIN_TRANS_SBW_UARTTX_EN, 1);
-  return 0;
-}
-
-void sbw_uarttx_give(void) {
-  gpio_put(PROBE_PIN_TRANS_SBW_UARTTX_EN, 0);
-  xSemaphoreGive(sbw_uarttx_mutex);
+  gpio_put(PROBE_PIN_TARGET_POWER, 0);
+  gpio_put(PROBE_PIN_TRANS_PROG_EN, 0);
+  xSemaphoreGive(programming_mutex);
 }
 
 void usb_thread(void *ptr) {
@@ -129,14 +104,13 @@ void dap_thread(void *ptr) {
                           portMAX_DELAY);
 
     if (req_buf[0] == ID_DAP_Connect) {
-      if (swd_uartrx_take() != 0) {
+      if (programming_enable() != 0) {
         rsp_buf[0] = DAP_ERROR;
         tud_vendor_write(rsp_buf, ((4U << 16) | 1U));
         continue;
       }
       programming_enable();
     } else if (req_buf[0] == ID_DAP_Disconnect) {
-      swd_uartrx_give();
       programming_disable();
     }
 
@@ -162,16 +136,14 @@ int SBW_ProcessCommand(sbw_req_t *request, sbw_rsp_t *response) {
 
   switch (request->req_type) {
   case SBW_REQ_START:
-    if (sbw_uarttx_take() != 0) {
+    if (programming_enable() != 0) {
       response->rc = SBW_RC_ERR_GENERIC;
       return 1;
     }
-    programming_enable();
     response->rc = sbw_dev_connect();
     return 1;
   case SBW_REQ_STOP:
     response->rc = sbw_dev_disconnect();
-    sbw_uarttx_give();
     programming_disable();
     return 1;
   case SBW_REQ_HALT:
@@ -201,7 +173,7 @@ void sbw_thread(void *ptr) {
   sbw_rsp_t response;
   sbw_pins_t pins = {.sbw_tck = PROBE_PIN_SBWCLK,
                      .sbw_tdio = PROBE_PIN_SBWIO,
-                     .sbw_dir = PROBE_PIN_SBWDIR};
+                     .sbw_dir = PROBE_PIN_PROG_DIR};
 
   sbw_dev_setup(&pins);
 
@@ -227,22 +199,23 @@ int main(void) {
 
   gpio_init(PROBE_PIN_TARGET_POWER);
   gpio_set_dir(PROBE_PIN_TARGET_POWER, GPIO_OUT);
-  gpio_init(PROBE_PIN_TRANS_CLOCK_EN);
-  gpio_set_dir(PROBE_PIN_TRANS_CLOCK_EN, GPIO_OUT);
-  gpio_init(PROBE_PIN_TRANS_SWD_UARTRX_EN);
-  gpio_set_dir(PROBE_PIN_TRANS_SWD_UARTRX_EN, GPIO_OUT);
-  gpio_init(PROBE_PIN_TRANS_SBW_UARTTX_EN);
-  gpio_set_dir(PROBE_PIN_TRANS_SBW_UARTTX_EN, GPIO_OUT);
+  gpio_init(PROBE_PIN_TRANS_PROG_EN);
+  gpio_set_dir(PROBE_PIN_TRANS_PROG_EN, GPIO_OUT);
+  gpio_init(PROBE_PIN_TRANS_UARTRX_EN);
+  gpio_set_dir(PROBE_PIN_TRANS_UARTRX_EN, GPIO_OUT);
+  gpio_init(PROBE_PIN_TRANS_UARTTX_EN);
+  gpio_set_dir(PROBE_PIN_TRANS_UARTTX_EN, GPIO_OUT);
+
+  gpio_init(PROBE_PIN_PROG_DIR);
+  gpio_set_dir(PROBE_PIN_PROG_DIR, GPIO_OUT);
+  gpio_put(PROBE_PIN_PROG_DIR, false);
 
   printf("Welcome to Rioteeprobe!\n");
 
   dap_req_buf = xMessageBufferCreate(256);
   sbw_req_buf = xMessageBufferCreate(256);
 
-  sbw_uarttx_mutex = xSemaphoreCreateMutex();
-  swd_uartrx_mutex = xSemaphoreCreateMutex();
-
-  programming_sem = xSemaphoreCreateCounting(2, 0);
+  programming_mutex = xSemaphoreCreateMutex();
 
   /* UART needs to preempt USB as if we don't, characters get lost */
   xTaskCreate(cdc_thread, "UART", configMINIMAL_STACK_SIZE, NULL,

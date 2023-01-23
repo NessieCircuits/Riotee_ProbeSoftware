@@ -272,11 +272,8 @@ int sbw_transport_setup(sbw_pins_t *sbw_pins) {
 
   gpio_init(pins.sbw_tdio);
   gpio_init(pins.sbw_tck);
-  gpio_init(pins.sbw_dir);
 
   gpio_set_pulls(pins.sbw_tdio, false, false);
-  gpio_set_dir(pins.sbw_dir, GPIO_OUT);
-  gpio_put(pins.sbw_dir, false);
 
   /*
    * Make sure that clock frequency is around 500k. This number is taken from

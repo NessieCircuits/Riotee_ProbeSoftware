@@ -227,12 +227,12 @@ uint8_t SWD_Transfer(uint32_t request, uint32_t *data) {
 }
 
 void swd_transport_read_mode(void) {
-  gpio_put(PROBE_PIN_SWDDIR, 0);
+  gpio_put(PROBE_PIN_PROG_DIR, 0);
   gpio_set_dir(PROBE_PIN_SWDIO, GPIO_IN);
 }
 
 void swd_transport_write_mode(void) {
-  gpio_put(PROBE_PIN_SWDDIR, 1);
+  gpio_put(PROBE_PIN_PROG_DIR, 1);
   gpio_set_dir(PROBE_PIN_SWDIO, GPIO_OUT);
 }
 
@@ -245,10 +245,6 @@ void swd_transport_init() {
   gpio_init(PROBE_PIN_SWDIO);
   gpio_set_dir(PROBE_PIN_SWDIO, GPIO_IN);
   gpio_disable_pulls(PROBE_PIN_SWDIO);
-
-  gpio_init(PROBE_PIN_SWDDIR);
-  gpio_set_dir(PROBE_PIN_SWDDIR, GPIO_OUT);
-  gpio_put(PROBE_PIN_SWDDIR, 0);
 }
 
 void swd_transport_connect() {
@@ -257,7 +253,7 @@ void swd_transport_connect() {
 
   // Make sure SWDIO has a pullup on it. Idle state is high
   gpio_pull_up(PROBE_PIN_SWDIO);
-  gpio_put(PROBE_PIN_SWDDIR, 1);
+  gpio_put(PROBE_PIN_PROG_DIR, 1);
 
   swd_transport_write_mode();
 }
@@ -269,7 +265,7 @@ void swd_transport_disconnect() {
   gpio_set_dir(PROBE_PIN_SWDIO, GPIO_IN);
   gpio_disable_pulls(PROBE_PIN_SWDCLK);
 
-  gpio_put(PROBE_PIN_SWDDIR, 0);
+  gpio_put(PROBE_PIN_PROG_DIR, 0);
 }
 
 #endif /* (DAP_SWD != 0) */
