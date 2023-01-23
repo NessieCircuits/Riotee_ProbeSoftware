@@ -48,5 +48,5 @@ jobs:
         username: ${{ secrets.FTP_USERNAME }}
         password: ${{ secrets.FTP_PASSWORD }}
         local-dir: artifacts/
-        server-dir: /htdocs/riotee/artifacts/probe_firmware/latest/${{ matrix.board }}/
+        server-dir: /htdocs/riotee/artifacts/probe_firmware/latest/
         protocol: ftps
