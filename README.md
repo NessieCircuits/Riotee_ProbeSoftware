@@ -1,5 +1,7 @@
 # Riotee Probe Firmware
 
+[![Cmake build](https://github.com/NessieCircuits/Riotee_ProbeFirmware/actions/workflows/cmake.yml/badge.svg)](https://github.com/NessieCircuits/Riotee_ProbeFirmware/actions/workflows/cmake.yml)
+
 This repository hosts the firmware running on the [Riotee probe](https://github.com/NessieCircuits/Riotee_ProbeHardware) and the [Riotee board](https://github.com/NessieCircuits/Riotee_Board). Both devices have a Raspberry Pi RP2040 that is connected to a PC via USB and controls programming and debugging of the microncontrollers inside the Riotee module. Specifically, the software supports ARM's Serial-Wire-Debug (SWD) and TI's Spy-By-Wire (SBW) protocols. Host-side it exposes a CMSIS-DAP v2 compatible interface and a custom CDC-ACM interface for SBW programming.
 
 # References
