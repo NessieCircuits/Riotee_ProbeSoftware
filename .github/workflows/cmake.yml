@@ -8,16 +8,22 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: lukstep/raspberry-pi-pico-sdk:latest
+    strategy:
+      matrix:
+        board: [riotee_board, riotee_probe]
+
     steps:
     - uses: actions/checkout@v3
       with:
         submodules: true
 
-    - name: Create build directory
-      run: mkdir build
+    - name: Create build and output directory
+      run: mkdir build artifacts
 
     - name: Configure cmake
       run: cd build && cmake ..
+      env:
+        PICO_BOARD: ${{ matrix.board }}
 
     - name: Build code
       run: cd build && make
@@ -25,7 +31,22 @@ jobs:
     - name: Upload artifacts to github
       uses: actions/upload-artifact@v3
       with:
-        name: binaries
+        name: ${{ matrix.board }}
         path: |
           build/rioteeprobe.uf2
           build/rioteeprobe.hex
+
+    - name: Copy binaries to output directory
+      run: |
+        cp build/rioteeprobe.uf2 artifacts/bin_${{ matrix.board }}.uf2
+        cp build/rioteeprobe.hex artifacts/bin_${{ matrix.board }}.hex
+
+    - name: Upload artifacts to webserver
+      uses: SamKirkland/FTP-Deploy-Action@4.3.3
+      with:
+        server: www.riotee.nessie-circuits.de
+        username: ${{ secrets.FTP_USERNAME }}
+        password: ${{ secrets.FTP_PASSWORD }}
+        local-dir: artifacts/
+        server-dir: /htdocs/riotee/artifacts/probe_firmware/latest/${{ matrix.board }}/
+        protocol: ftps
