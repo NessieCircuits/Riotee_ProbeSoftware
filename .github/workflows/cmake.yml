@@ -1,0 +1,31 @@
+name: Cmake build
+
+on:
+  push:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: lukstep/raspberry-pi-pico-sdk:latest
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        submodules: true
+
+    - name: Create build directory
+      run: mkdir build
+
+    - name: Configure cmake
+      run: cd build && cmake ..
+
+    - name: Build code
+      run: cd build && make
+
+    - name: Upload artifacts to github
+      uses: actions/upload-artifact@v3
+      with:
+        name: binaries
+        path: |
+          build/rioteeprobe.uf2
+          build/rioteeprobe.hex
