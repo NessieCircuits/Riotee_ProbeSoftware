@@ -21,13 +21,13 @@
 #define PROBE_PIN_TARGET_POWER 0
 
 /* Controls power for programming level translators */
-#define PROBE_PIN_TRANS_PROG_EN 0
+#define PROBE_PIN_TRANS_PROG_EN 20
 
 /* Controls power for UART TX level translator */
-#define PROBE_PIN_TRANS_UARTTX_EN 12
+#define PROBE_PIN_TRANS_UARTTX_EN 5
 
 /* Controls power for UART RX level translator */
-#define PROBE_PIN_TRANS_UARTRX_EN 11
+#define PROBE_PIN_TRANS_UARTRX_EN 6
 
 /* Uart TX to target */
 #define PROBE_UART_TX 8
@@ -55,7 +55,7 @@
 #define PROBE_PIN_PROG_DIR 15
 
 /* Controls target fixed power supply */
-#define PROBE_PIN_TARGET_POWER 0
+#define PROBE_PIN_TARGET_POWER 3
 
 /* Controls power for programming level translators */
 #define PROBE_PIN_TRANS_PROG_EN 20
