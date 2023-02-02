@@ -112,6 +112,9 @@ void dap_thread(void *ptr) {
       programming_enable();
     } else if (req_buf[0] == ID_DAP_Disconnect) {
       programming_disable();
+      gpio_put(PROBE_PIN_LED, 0);
+    } else {
+      gpio_put(PROBE_PIN_LED, !gpio_get(PROBE_PIN_LED));
     }
 
     resp_len = DAP_ProcessCommand(req_buf, rsp_buf);
@@ -134,6 +137,8 @@ void tud_cdc_rx_cb(uint8_t itf) {
  * response. */
 int SBW_ProcessCommand(sbw_req_t *request, sbw_rsp_t *response) {
 
+  gpio_put(PROBE_PIN_LED, !gpio_get(PROBE_PIN_LED));
+
   switch (request->req_type) {
   case SBW_REQ_START:
     if (programming_enable() != 0) {
@@ -145,6 +150,8 @@ int SBW_ProcessCommand(sbw_req_t *request, sbw_rsp_t *response) {
   case SBW_REQ_STOP:
     response->rc = sbw_dev_disconnect();
     programming_disable();
+    gpio_put(PROBE_PIN_LED, 0);
+
     return 1;
   case SBW_REQ_HALT:
     response->rc = sbw_dev_halt();
@@ -196,6 +203,10 @@ int main(void) {
   usb_serial_init();
   cdc_uart_init();
   tusb_init();
+
+  gpio_init(PROBE_PIN_LED);
+  gpio_set_dir(PROBE_PIN_LED, GPIO_OUT);
+  gpio_put(PROBE_PIN_LED, 0);
 
   gpio_init(PROBE_PIN_TARGET_POWER);
   gpio_set_dir(PROBE_PIN_TARGET_POWER, GPIO_OUT);
