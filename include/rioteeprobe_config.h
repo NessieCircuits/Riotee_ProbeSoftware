@@ -3,8 +3,8 @@
 
 #ifdef BOARD_RIOTEE_BOARD
 
-#define PROBE_USB_VID 0x2E8A
-#define PROBE_USB_PID 0x000C
+#define PROBE_USB_VID 0x1209
+#define PROBE_USB_PID 0xC8A0
 
 #define PROBE_PIN_LED 2
 
@@ -40,8 +40,8 @@
 
 #ifdef BOARD_RIOTEE_PROBE
 
-#define PROBE_USB_VID 0x2E8A
-#define PROBE_USB_PID 0x000C
+#define PROBE_USB_VID 0x1209
+#define PROBE_USB_PID 0xC8A1
 
 #define PROBE_PIN_LED 2
 
