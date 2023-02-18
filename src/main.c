@@ -58,18 +58,33 @@ static MessageBufferHandle_t dap_req_buf, sbw_req_buf;
 
 /* Protects access to programming hardware */
 static SemaphoreHandle_t programming_mutex;
+static SemaphoreHandle_t target_power_smphr;
+
+int target_power_enable(void) {
+  xSemaphoreGive(target_power_smphr);
+  gpio_put(PROBE_PIN_TARGET_POWER, 1);
+  return 0;
+}
+
+int target_power_disable(void) {
+  xSemaphoreTake(target_power_smphr, 0);
+  /* Only switch off power if we're the last one using it*/
+  if (uxSemaphoreGetCount(target_power_smphr) == 0)
+    gpio_put(PROBE_PIN_TARGET_POWER, 0);
+  return 0;
+}
 
 int programming_enable(void) {
   if (xSemaphoreTake(programming_mutex, 0) != pdTRUE)
     return -1;
-  gpio_put(PROBE_PIN_TARGET_POWER, 1);
+  target_power_enable();
   gpio_put(PROBE_PIN_TRANS_PROG_EN, 1);
   return 0;
 }
 
 void programming_disable(void) {
 
-  gpio_put(PROBE_PIN_TARGET_POWER, 0);
+  target_power_disable();
   gpio_put(PROBE_PIN_TRANS_PROG_EN, 0);
   xSemaphoreGive(programming_mutex);
 }
@@ -168,6 +183,17 @@ int SBW_ProcessCommand(sbw_req_t *request, sbw_rsp_t *response) {
         sbw_dev_mem_read(response->data, request->address, request->len);
     response->len = request->len;
     return 2 + (response->len * 2);
+  case SBW_REQ_POWER:
+    if (request->data[0] == TARGET_POWER_ON) {
+      response->rc = target_power_enable();
+      return 1;
+    } else if (request->data[0] == TARGET_POWER_OFF) {
+      response->rc = target_power_disable();
+      return 1;
+    } else {
+      response->rc = SBW_RC_ERR_GENERIC;
+      return 1;
+    }
   default:
     response->rc = SBW_RC_ERR_UNKNOWN_REQ;
     return 1;
@@ -227,6 +253,7 @@ int main(void) {
   sbw_req_buf = xMessageBufferCreate(256);
 
   programming_mutex = xSemaphoreCreateMutex();
+  target_power_smphr = xSemaphoreCreateCounting(4, 0);
 
   /* UART needs to preempt USB as if we don't, characters get lost */
   xTaskCreate(cdc_thread, "UART", configMINIMAL_STACK_SIZE, NULL,
