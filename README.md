@@ -40,7 +40,7 @@ cmake ..
 
 ## Uploading the firmware
 
-To upload the firmware to the Riotee probe or Riotee board, connect a wire from one of the ground pins to the pad labelled 'USB_BOOT' on the bottom of the board, while plugging in the USB cable. A removable storage drive should appear on your PC. Drop a UF2 compatible binary into the drive.
+To upload the firmware to the Riotee probe or Riotee board, connect a wire from one of the ground pins to the pad labeled 'USB_BOOT' on the bottom of the board, while plugging in the USB cable. A removable storage drive should appear on your PC. Drop a UF2 compatible binary into the drive.
 
 ## USB IDs
 
