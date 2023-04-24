@@ -240,8 +240,10 @@ int main(void) {
   gpio_set_dir(PROBE_PIN_TRANS_PROG_EN, GPIO_OUT);
   gpio_init(PROBE_PIN_TRANS_UARTRX_EN);
   gpio_set_dir(PROBE_PIN_TRANS_UARTRX_EN, GPIO_OUT);
+  gpio_put(PROBE_PIN_TRANS_UARTRX_EN, 1);
   gpio_init(PROBE_PIN_TRANS_UARTTX_EN);
   gpio_set_dir(PROBE_PIN_TRANS_UARTTX_EN, GPIO_OUT);
+  gpio_put(PROBE_PIN_TRANS_UARTTX_EN, 1);
 
   gpio_init(PROBE_PIN_PROG_DIR);
   gpio_set_dir(PROBE_PIN_PROG_DIR, GPIO_OUT);
