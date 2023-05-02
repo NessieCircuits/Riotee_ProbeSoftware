@@ -29,6 +29,7 @@ add_executable(rioteeprobe
         src/sbw_transport.c
         src/sbw_jtag.c
         src/sbw_device.c
+        src/probe_gpio.c
         )
 
 target_sources(rioteeprobe PRIVATE

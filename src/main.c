@@ -41,6 +41,7 @@
 #include "DAP.h"
 #include "cdc_uart.h"
 #include "get_serial.h"
+#include "probe_gpio.h"
 #include "rioteeprobe_config.h"
 #include "sbw_device.h"
 #include "sbw_protocol.h"
@@ -194,6 +195,14 @@ int SBW_ProcessCommand(sbw_req_t *request, sbw_rsp_t *response) {
       response->rc = SBW_RC_ERR_GENERIC;
       return 1;
     }
+  case SBW_REQ_IOSET:
+    response->rc = probe_ioset(request->data[0], request->data[1]);
+    return 1;
+  case SBW_REQ_IOGET:
+    response->rc = probe_ioget(&response->data[0], request->data[0]);
+    if (response->rc == SBW_RC_OK)
+      response->len = 1;
+    return 2 + (response->len * 2);
   default:
     response->rc = SBW_RC_ERR_UNKNOWN_REQ;
     return 1;
@@ -234,20 +243,35 @@ int main(void) {
   gpio_set_dir(PROBE_PIN_LED, GPIO_OUT);
   gpio_put(PROBE_PIN_LED, 0);
 
+  /* Enables/disables constant voltage supply for target */
   gpio_init(PROBE_PIN_TARGET_POWER);
   gpio_set_dir(PROBE_PIN_TARGET_POWER, GPIO_OUT);
+
+  /* Enables/disables supply of programming level translators */
   gpio_init(PROBE_PIN_TRANS_PROG_EN);
   gpio_set_dir(PROBE_PIN_TRANS_PROG_EN, GPIO_OUT);
+
+  /* Enables/disables supply of UARTRX level translator */
   gpio_init(PROBE_PIN_TRANS_UARTRX_EN);
   gpio_set_dir(PROBE_PIN_TRANS_UARTRX_EN, GPIO_OUT);
   gpio_put(PROBE_PIN_TRANS_UARTRX_EN, 1);
+
+  /* Enables/disables supply of UARTTX level translator */
   gpio_init(PROBE_PIN_TRANS_UARTTX_EN);
   gpio_set_dir(PROBE_PIN_TRANS_UARTTX_EN, GPIO_OUT);
   gpio_put(PROBE_PIN_TRANS_UARTTX_EN, 1);
 
+  /* Controls direction of programming level translator */
   gpio_init(PROBE_PIN_PROG_DIR);
   gpio_set_dir(PROBE_PIN_PROG_DIR, GPIO_OUT);
   gpio_put(PROBE_PIN_PROG_DIR, false);
+
+#ifdef BOARD_RIOTEE_PROBE
+  gpio_init(PROBE_PIN_GPIO0);
+  gpio_init(PROBE_PIN_GPIO1);
+  gpio_init(PROBE_PIN_GPIO2);
+  gpio_init(PROBE_PIN_GPIO3);
+#endif
 
   printf("Welcome to Rioteeprobe!\n");
 

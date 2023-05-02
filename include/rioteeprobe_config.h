@@ -73,6 +73,13 @@
 
 #define PROBE_UART_INTERFACE uart1
 
+#define PROBE_GPIO_NUM 4
+
+#define PROBE_PIN_GPIO0 4
+#define PROBE_PIN_GPIO1 6
+#define PROBE_PIN_GPIO2 25
+#define PROBE_PIN_GPIO3 26
+
 #endif
 
 #define PROBE_UART_BAUDRATE 115200
