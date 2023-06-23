@@ -1,4 +1,4 @@
-name: Cmake build
+name: Firmware build
 
 on:
   push:
@@ -38,4 +38,4 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: bin_${{ matrix.board }}
-        path: bin_${{matrix.board}}.uf2
+        path: firmware/bin_${{matrix.board}}.uf2
