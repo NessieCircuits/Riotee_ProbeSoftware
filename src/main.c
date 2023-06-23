@@ -143,7 +143,6 @@ void dap_thread(void *ptr) {
         tud_vendor_write(rsp_buf, ((4U << 16) | 1U));
         continue;
       }
-      programming_enable();
     } else if (req_buf[0] == ID_DAP_Disconnect) {
       programming_disable();
       gpio_put(PROBE_PIN_LED, 0);
@@ -153,6 +152,7 @@ void dap_thread(void *ptr) {
 
     resp_len = DAP_ProcessCommand(req_buf, rsp_buf);
     tud_vendor_write(rsp_buf, resp_len);
+    tud_vendor_flush();
   }
 }
 
