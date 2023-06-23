@@ -4,7 +4,7 @@
 
 This repository hosts the firmware running on the [Riotee Probe](https://github.com/NessieCircuits/Riotee_ProbeHardware) and the [Riotee Board](https://github.com/NessieCircuits/Riotee_Board). Both devices have a Raspberry Pi RP2040 that is connected to a PC via USB and controls programming and debugging of the microcontrollers inside the Riotee module. Specifically, the software supports ARM's Serial-Wire-Debug (SWD) and TI's Spy-By-Wire (SBW) protocols. Host-side it exposes a CMSIS-DAP v2 compatible interface and a custom CDC-ACM interface for SBW programming.
 
-Download the latest UF2 binaries for the Riotee Board or Riotee Probe from the [release page](https://github.com/NessieCircuits/Riotee_ProbeFirmware/releases/latest)
+Download the latest UF2 binaries for the Riotee Board or Riotee Probe from the [release page](https://github.com/NessieCircuits/Riotee_ProbeFirmware/releases/latest).
 
 
 ## Building
