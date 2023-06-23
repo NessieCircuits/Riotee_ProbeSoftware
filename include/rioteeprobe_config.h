@@ -24,10 +24,14 @@
 #define PROBE_PIN_TRANS_PROG_EN 20
 
 /* Controls power for UART TX level translator */
-#define PROBE_PIN_TRANS_UARTTX_EN 5
+#define PROBE_PIN_TRANS_UARTTX_EN 6
 
 /* Controls power for UART RX level translator */
-#define PROBE_PIN_TRANS_UARTRX_EN 6
+#define PROBE_PIN_TRANS_UARTRX_EN 5
+
+/* Controls direction for UART RX level translator (for other purposes than
+ * UART) */
+#define PROBE_PIN_TRANS_UARTRX_DIR 12
 
 /* Uart TX to target */
 #define PROBE_UART_TX 8
@@ -65,6 +69,10 @@
 
 /* Controls power for UART RX level translator */
 #define PROBE_PIN_TRANS_UARTRX_EN 12
+
+/* Controls direction for UART RX level translator (for other purposes than
+ * UART) */
+#define PROBE_PIN_TRANS_UARTRX_DIR 10
 
 /* Uart TX to target */
 #define PROBE_UART_TX 8
