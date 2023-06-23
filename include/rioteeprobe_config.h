@@ -40,6 +40,10 @@
 
 #define PROBE_UART_INTERFACE uart1
 
+/* Controls switch that bypasses power supply of Riotee module for current
+ * measurements.*/
+#define PROBE_PIN_BYPASS_ENABLE 13
+
 #endif
 
 #ifdef BOARD_RIOTEE_PROBE

@@ -75,6 +75,24 @@ int target_power_disable(void) {
   return 0;
 }
 
+int bypass_enable(void) {
+#ifdef BOARD_RIOTEE_PROBE
+  return SBW_RC_ERR_UNSUPPORTED;
+#else
+  gpio_put(PROBE_PIN_BYPASS_ENABLE, true);
+  return 0;
+#endif
+}
+
+int bypass_disable(void) {
+#ifdef BOARD_RIOTEE_PROBE
+  return SBW_RC_ERR_UNSUPPORTED;
+#else
+  gpio_put(PROBE_PIN_BYPASS_ENABLE, false);
+  return 0;
+#endif
+}
+
 int programming_enable(void) {
   if (xSemaphoreTake(programming_mutex, 0) != pdTRUE)
     return -1;
@@ -185,24 +203,31 @@ int SBW_ProcessCommand(sbw_req_t *request, sbw_rsp_t *response) {
     response->len = request->len;
     return 2 + (response->len * 2);
   case SBW_REQ_POWER:
-    if (request->data[0] == TARGET_POWER_ON) {
+    if (request->data[0] == TARGET_POWER_ON)
       response->rc = target_power_enable();
-      return 1;
-    } else if (request->data[0] == TARGET_POWER_OFF) {
+    else if (request->data[0] == TARGET_POWER_OFF)
       response->rc = target_power_disable();
-      return 1;
-    } else {
+    else
       response->rc = SBW_RC_ERR_GENERIC;
-      return 1;
-    }
+    return 1;
   case SBW_REQ_IOSET:
     response->rc = probe_ioset(request->data[0], request->data[1]);
     return 1;
   case SBW_REQ_IOGET:
-    response->rc = probe_ioget(&response->data[0], request->data[0]);
-    if (response->rc == SBW_RC_OK)
+    if ((response->rc = probe_ioget(response->data, request->data[0])) ==
+        SBW_RC_OK) {
       response->len = 1;
-    return 2 + (response->len * 2);
+      return 2 + (response->len * 2);
+    } else
+      return 1;
+  case SBW_REQ_BYPASS:
+    if (request->data[0] == BYPASS_ON)
+      response->rc = bypass_enable();
+    else if (request->data[0] == BYPASS_OFF)
+      response->rc = bypass_disable();
+    else
+      response->rc = SBW_RC_ERR_GENERIC;
+    return 1;
   default:
     response->rc = SBW_RC_ERR_UNKNOWN_REQ;
     return 1;
@@ -275,6 +300,13 @@ int main(void) {
   gpio_init(PROBE_PIN_GPIO1);
   gpio_init(PROBE_PIN_GPIO2);
   gpio_init(PROBE_PIN_GPIO3);
+#endif
+
+#ifdef BOARD_RIOTEE_BOARD
+  gpio_init(PROBE_PIN_BYPASS_ENABLE);
+  gpio_set_dir(PROBE_PIN_BYPASS_ENABLE, GPIO_OUT);
+  gpio_put(PROBE_PIN_BYPASS_ENABLE, false);
+
 #endif
 
   printf("Welcome to Rioteeprobe!\n");
