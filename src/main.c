@@ -254,7 +254,11 @@ int main(void) {
   /* Enables/disables supply of UARTRX level translator */
   gpio_init(PROBE_PIN_TRANS_UARTRX_EN);
   gpio_set_dir(PROBE_PIN_TRANS_UARTRX_EN, GPIO_OUT);
-  gpio_put(PROBE_PIN_TRANS_UARTRX_EN, 1);
+  gpio_put(PROBE_PIN_TRANS_UARTRX_EN, false);
+
+  gpio_init(PROBE_PIN_TRANS_UARTRX_DIR);
+  gpio_set_dir(PROBE_PIN_TRANS_UARTRX_DIR, GPIO_OUT);
+  gpio_put(PROBE_PIN_TRANS_UARTRX_DIR, false);
 
   /* Enables/disables supply of UARTTX level translator */
   gpio_init(PROBE_PIN_TRANS_UARTTX_EN);
