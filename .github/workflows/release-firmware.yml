@@ -27,4 +27,4 @@ jobs:
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
-          files: bin_${{matrix.board}}.uf2
+          files: probe_${{matrix.board}}_${{github.ref_name}}.uf2
