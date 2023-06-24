@@ -24,6 +24,8 @@ jobs:
         with:
           name: bin_${{matrix.board}}
 
+      - run: mv bin_${{matrix.board}}.uf2 probe_${{matrix.board}}_${{github.ref_name}}.uf2
+
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
