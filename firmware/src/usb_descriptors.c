@@ -43,9 +43,9 @@ tusb_desc_device_t const desc_device = {
     .bDeviceProtocol = 0x00,
     .bMaxPacketSize0 = CFG_TUD_ENDPOINT0_SIZE,
 
-    .idVendor = PROBE_USB_VID,  // Pi
-    .idProduct = PROBE_USB_PID, // CMSIS-DAP adapter
-    .bcdDevice = 0x0101,        // Version 01.01
+    .idVendor = PROBE_USB_VID,
+    .idProduct = PROBE_USB_PID,
+    .bcdDevice = 0x0101, // Version 01.01
     .iManufacturer = 0x01,
     .iProduct = 0x02,
     .iSerialNumber = 0x03,
@@ -61,14 +61,7 @@ uint8_t const *tud_descriptor_device_cb(void) {
 // Configuration Descriptor
 //--------------------------------------------------------------------+
 
-enum {
-  ITF_NUM_PROBE,
-  ITF_NUM_CDC_UART,
-  ITF_NUM_CDC_UART_DATA,
-  ITF_NUM_CDC_SBW,
-  ITF_NUM_CDC_SBW_DATA,
-  ITF_NUM_TOTAL
-};
+enum { ITF_NUM_PROBE, ITF_NUM_CDC_UART, ITF_NUM_CDC_UART_DATA, ITF_NUM_TOTAL };
 
 /* UART notifications on endpoint 1 IN */
 #define CDC_NOTIFICATION_EP_NUM 0x81
@@ -83,16 +76,8 @@ enum {
 /* DAP commands on endpoint 3 IN */
 #define PROBE_IN_EP_NUM 0x83
 
-/* Spycoprobe notifications on endpoint 4 IN */
-#define SBWPROBE_NOTIFICATION_IN_EP_NUM 0x84
-/* Spycoprobe replies on endpoint 5 OUT */
-#define SBWPROBE_OUT_EP_NUM 0x05
-/* Spycoprobe commands on endpoint 5 IN */
-#define SBWPROBE_IN_EP_NUM 0x85
-
 #define CONFIG_TOTAL_LEN                                                       \
-  (TUD_CONFIG_DESC_LEN + TUD_CDC_DESC_LEN + TUD_VENDOR_DESC_LEN +              \
-   TUD_CDC_DESC_LEN)
+  (TUD_CONFIG_DESC_LEN + TUD_CDC_DESC_LEN + TUD_VENDOR_DESC_LEN)
 
 uint8_t const desc_configuration[] = {
     TUD_CONFIG_DESCRIPTOR(1, ITF_NUM_TOTAL, 0, CONFIG_TOTAL_LEN,
@@ -101,8 +86,6 @@ uint8_t const desc_configuration[] = {
                           64),
     TUD_CDC_DESCRIPTOR(ITF_NUM_CDC_UART, 5, CDC_NOTIFICATION_EP_NUM, 64,
                        CDC_DATA_OUT_EP_NUM, CDC_DATA_IN_EP_NUM, 64),
-    TUD_CDC_DESCRIPTOR(ITF_NUM_CDC_SBW, 6, SBWPROBE_NOTIFICATION_IN_EP_NUM, 64,
-                       SBWPROBE_OUT_EP_NUM, SBWPROBE_IN_EP_NUM, 64),
 };
 
 // Invoked when received GET CONFIGURATION DESCRIPTOR
@@ -125,7 +108,6 @@ char const *string_desc_arr[] = {
     usb_serial,                 // 3: Serial, uses flash unique ID
     "Rioteeprobe CMSIS-DAP v2", // 4: Interface descriptor for Bulk transport
     "Rioteeprobe CDC-ACM UART", // 5: Interface descriptor for CDC
-    "Rioteeprobe SBW",          // 6: Interface descriptor for CDC
 };
 
 static uint16_t _desc_str[32];

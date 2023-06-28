@@ -106,7 +106,7 @@ static int mem_write_word(uint32_t addr, uint16_t data) {
  *
  * @see SLAU320AJ 2.3.2.2.3
  */
-static int execute_por(void) {
+int sbw_dev_reset(void) {
   // provide one clock cycle to empty the pipe
   clr_tclk_sbw();
   set_tclk_sbw();
@@ -293,7 +293,7 @@ int sbw_dev_connect(void) {
     return rc;
   if ((rc = sbw_jtag_sync()) != SBW_ERR_NONE)
     return rc;
-  if ((rc = execute_por()) != SBW_ERR_NONE)
+  if ((rc = sbw_dev_reset()) != SBW_ERR_NONE)
     return rc;
   return SBW_ERR_NONE;
 }

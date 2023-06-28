@@ -21,6 +21,8 @@ enum { BYPASS_OFF = 0, BYPASS_ON = 1 };
 enum { IOSET_OUT_LOW = 0, IOSET_OUT_HIGH = 1, IOSET_IN = 2 };
 enum { IOGET_LOW = 0, IOGET_HIGH = 1 };
 
+typedef uint8_t probe_io_state_t;
+
 enum {
   SBW_RC_OK,
   SBW_RC_ERR_GENERIC,

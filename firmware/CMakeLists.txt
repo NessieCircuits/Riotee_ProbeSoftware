@@ -29,13 +29,12 @@ add_executable(rioteeprobe
         src/sbw_transport.c
         src/sbw_jtag.c
         src/sbw_device.c
-        src/probe_gpio.c
+        src/probe_vendor.c
         )
 
 target_sources(rioteeprobe PRIVATE
         CMSIS_5/CMSIS/DAP/Firmware/Source/DAP.c
         CMSIS_5/CMSIS/DAP/Firmware/Source/JTAG_DP.c
-        CMSIS_5/CMSIS/DAP/Firmware/Source/DAP_vendor.c
         CMSIS_5/CMSIS/DAP/Firmware/Source/SWO.c
         #CMSIS_5/CMSIS/DAP/Firmware/Source/SW_DP.c
         )
