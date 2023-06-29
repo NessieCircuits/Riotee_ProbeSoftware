@@ -104,7 +104,11 @@ uint8_t const *tud_descriptor_configuration_cb(uint8_t index) {
 char const *string_desc_arr[] = {
     (const char[]){0x09, 0x04}, // 0: supported language is English (0x0409)
     "Nessie Circuits",          // 1: Manufacturer
-    "Rioteeprobe",              // 2: Product
+#ifdef BOARD_RIOTEE_BOARD
+    "Riotee Board", // 2: Product
+#else
+    "Riotee Probe", // 2: Product
+#endif
     usb_serial,                 // 3: Serial, uses flash unique ID
     "Rioteeprobe CMSIS-DAP v2", // 4: Interface descriptor for Bulk transport
     "Rioteeprobe CDC-ACM UART", // 5: Interface descriptor for CDC

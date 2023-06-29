@@ -86,7 +86,7 @@ int target_power_disable(void) {
 
 int bypass_enable(void) {
 #ifdef BOARD_RIOTEE_PROBE
-  return SBW_RC_ERR_UNSUPPORTED;
+  return -1;
 #else
   gpio_put(PROBE_PIN_BYPASS_ENABLE, true);
   return 0;
@@ -95,7 +95,7 @@ int bypass_enable(void) {
 
 int bypass_disable(void) {
 #ifdef BOARD_RIOTEE_PROBE
-  return SBW_RC_ERR_UNSUPPORTED;
+  return -1;
 #else
   gpio_put(PROBE_PIN_BYPASS_ENABLE, false);
   return 0;
