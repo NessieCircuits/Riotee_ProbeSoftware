@@ -59,7 +59,7 @@ class TargetMSP430(Target):
 
     def write(self, addr: int, data: Union[Sequence[np.uint16], np.uint16]):
         if hasattr(data, "__len__"):
-            pkt = struct.pack(f"=IB{len(data)}H", addr, len(data) // 2, *data)
+            pkt = struct.pack(f"=IB{len(data)}H", addr, len(data), *data)
         else:
             pkt = struct.pack(f"=IBH", addr, 1, data)
 
@@ -67,7 +67,7 @@ class TargetMSP430(Target):
         if len(pkt) >= DAP_VENDOR_MAX_PKT_SIZE:
             raise ValueError("Data length exceeds maximum packet size")
 
-        self._session.vendor_cmd(ReqType.ID_DAP_VENDOR_SBW_WRITE, pkt)
+        rsp = self._session.vendor_cmd(ReqType.ID_DAP_VENDOR_SBW_WRITE, pkt)
 
     def read(self, addr, n_words: int = 1):
         pkt = struct.pack(f"=IB", addr, n_words)

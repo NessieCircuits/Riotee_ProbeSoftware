@@ -7,12 +7,14 @@ from riotee_probe.protocol import ID_DAP_VENDOR0
 
 class RioteeProbeSession(Session):
     def __init__(self):
-        pass
+        self.product_name = None
 
     def __enter__(self):
         probe = ConnectHelper.choose_probe()
         super().__init__(probe, target_override="nrf52")
         self.open(init_board=False)
+        self.product_name = probe.product_name
+        return self
 
     def __exit__(self, *exc):
         self.close()

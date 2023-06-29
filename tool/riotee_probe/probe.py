@@ -14,16 +14,20 @@ class GpioDir(Enum):
     GPIO_DIR_OUT = 1
 
 
+@contextmanager
+def get_connected_probe():
+    with RioteeProbeSession() as session:
+        if session.product_name == "Riotee Board":
+            yield RioteeProbeBoard(session)
+        elif session.product_name == "Riotee Probe":
+            yield RioteeProbeProbe(session)
+        else:
+            raise Exception(f"Unsupported probe {session.product_name} selected")
+
+
 class RioteeProbe(object):
-    def __init__(self):
-        self._session = RioteeProbeSession()
-
-    def __enter__(self):
-        self._session.__enter__()
-        return self
-
-    def __exit__(self, *exc):
-        self._session.__exit__(*exc)
+    def __init__(self, session):
+        self._session = session
 
     @contextmanager
     def msp430(self):
