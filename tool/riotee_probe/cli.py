@@ -24,7 +24,7 @@ def cli():
     pass
 
 
-@cli.command(short_help="Control power supply bypass")
+@cli.command(short_help="Control power supply bypass (Board only)")
 @click.option("--on/--off", required=True)
 @click.pass_context
 def bypass(ctx, on):
@@ -75,7 +75,12 @@ def resume(device):
         target.resume()
 
 
-@cli.command(short_help="Configure GPIO pin direction")
+@cli.group(short_help="Control GPIOs (Probe only)")
+def gpio():
+    pass
+
+
+@gpio.command(short_help="Configure GPIO pin direction")
 @click.option("--pin-no", "-p", type=int, required=True, help="Pin number")
 @click.option(
     "--direction",
@@ -84,7 +89,7 @@ def resume(device):
     required=True,
     help="Pin direction",
 )
-def gpio_dir(pin_no, direction):
+def dir(pin_no, direction):
     with get_connected_probe() as probe:
         if direction == "in":
             probe.gpio_dir(pin_no, GpioDir.GPIO_DIR_IN)
@@ -92,7 +97,7 @@ def gpio_dir(pin_no, direction):
             probe.gpio_dir(pin_no, GpioDir.GPIO_DIR_OUT)
 
 
-@cli.command(short_help="Set GPIO pin")
+@gpio.command(short_help="Set GPIO pin")
 @click.option("--pin-no", "-p", type=int, required=True, help="Pin number")
 @click.option(
     "--state",
@@ -101,7 +106,7 @@ def gpio_dir(pin_no, direction):
     required=True,
     help="Pin state",
 )
-def gpio_set(pin_no, state):
+def set(pin_no, state):
     with get_connected_probe() as probe:
         if state in ["high", "1"]:
             probe.gpio_set(pin_no, True)
@@ -109,9 +114,9 @@ def gpio_set(pin_no, state):
             probe.gpio_set(pin_no, False)
 
 
-@cli.command(short_help="Read GPIO pin")
+@gpio.command(short_help="Read GPIO pin")
 @click.option("--pin-no", "-p", type=int, required=True, help="Pin number")
-def gpio_get(pin_no):
+def get(pin_no):
     with get_connected_probe() as probe:
         state = probe.gpio_get(pin_no)
         click.echo(state)
