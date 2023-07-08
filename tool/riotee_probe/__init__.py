@@ -1,6 +1,6 @@
 """Riotee Probe Python package"""
 
-__version__ = "1.0.0"
+__version__ = "1.0.1"
 
 from riotee_probe.probe import RioteeProbe
 from riotee_probe.probe import RioteeProbeProbe
