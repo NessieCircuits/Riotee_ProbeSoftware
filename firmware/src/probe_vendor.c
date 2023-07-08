@@ -184,6 +184,8 @@ uint32_t DAP_ProcessVendorCommand(const uint8_t *request, uint8_t *response) {
       response[1] = DAP_ERROR;
     if (programming_disable() < 0)
       response[1] = DAP_ERROR;
+    gpio_put(PROBE_PIN_LED, 0);
+
     break;
   case ID_DAP_VENDOR_SBW_READ:
     /* Request: [Request (1B) | Address (4B) | NWords (1B)]*/
@@ -195,6 +197,7 @@ uint32_t DAP_ProcessVendorCommand(const uint8_t *request, uint8_t *response) {
       rsp_len += n_words_r * 2;
     } else
       response[1] = DAP_ERROR;
+    gpio_put(PROBE_PIN_LED, !gpio_get(PROBE_PIN_LED));
     break;
   case ID_DAP_VENDOR_SBW_WRITE:
     /* [Request (1B) | Address (4B) | NWords (1B) | Data (NWords * 2B)]*/
@@ -203,6 +206,7 @@ uint32_t DAP_ProcessVendorCommand(const uint8_t *request, uint8_t *response) {
     uint8_t n_words_w = request[5];
     if (sbw_dev_mem_write(addr, (uint16_t *)&request[6], n_words_w) < 0)
       response[1] = DAP_ERROR;
+    gpio_put(PROBE_PIN_LED, !gpio_get(PROBE_PIN_LED));
     break;
   default:
     response[0] = ID_DAP_Invalid;
