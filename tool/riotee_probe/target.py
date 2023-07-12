@@ -117,7 +117,7 @@ class TargetNRF52(Target):
             def progress(arg):
                 pass
 
-        FileProgrammer(self._session, progress=progress).program(fw_path)
+        FileProgrammer(self._session, progress=progress).program(str(fw_path))
 
     def halt(self):
         self._session.board.target.halt()
