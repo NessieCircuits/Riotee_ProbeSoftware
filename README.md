@@ -1,7 +1,7 @@
 # Riotee Probe Software
 
-[![Firmware build](https://github.com/NessieCircuits/Riotee_ProbeFirmware/actions/workflows/build-firmware.yml/badge.svg)](https://github.com/NessieCircuits/Riotee_ProbeFirmware/actions/workflows/build-firmware.yml)
-[![Python build](https://github.com/NessieCircuits/Riotee_ProbeFirmware/actions/workflows/build-tool.yml/badge.svg)](https://github.com/NessieCircuits/Riotee_ProbeFirmware/actions/workflows/build-tool.yml)
+[![Firmware build](https://github.com/NessieCircuits/Riotee_ProbeSoftware/actions/workflows/build-firmware.yml/badge.svg)](https://github.com/NessieCircuits/Riotee_ProbeSoftware/actions/workflows/build-firmware.yml)
+[![Python build](https://github.com/NessieCircuits/Riotee_ProbeSoftware/actions/workflows/build-tool.yml/badge.svg)](https://github.com/NessieCircuits/Riotee_ProbeSoftware/actions/workflows/build-tool.yml)
 [![PyPiVersion](https://img.shields.io/pypi/v/riotee_probe.svg)](https://pypi.org/project/riotee_probe)
 
 This repository hosts the firmware running on the [Riotee Probe](https://github.com/NessieCircuits/Riotee_ProbeHardware) and the [Riotee Board](https://github.com/NessieCircuits/Riotee_Board) and a command line tool for controlling the probe via USB. The Riotee Board and Riotee Probe have a Raspberry Pi RP2040 that is connected to a PC via USB and controls programming and debugging of the microcontrollers inside the Riotee module.
@@ -14,7 +14,7 @@ Features:
  - Bypassing of power supply for measuring current consumption on the Riotee Board
  - Control of 4 GPIOs on the headers on the Riotee Probe
 
-Download the latest UF2 binaries for the Riotee Board or Riotee Probe from the [release page](https://github.com/NessieCircuits/Riotee_ProbeFirmware/releases/latest) or [build them from source](#building-the-firmware).
+Download the latest UF2 binaries for the Riotee Board or Riotee Probe from the [release page](https://github.com/NessieCircuits/Riotee_ProbeSoftware/releases/latest) or [build them from source](#building-the-firmware).
 
 ## Uploading the firmware
 
@@ -59,13 +59,13 @@ Follow the [official instructions](https://datasheets.raspberrypi.com/pico/getti
 Clone this repository and install the submodules:
 
 ```bash
-git clone --recursive git@github.com:NessieCircuits/Riotee_ProbeFirmware.git
+git clone --recursive git@github.com:NessieCircuits/Riotee_ProbeSoftware.git
 ```
 
 Create the `build` directory, configure cmake and build:
 
 ```bash
-cd Riotee_ProbeFirmware
+cd Riotee_ProbeSoftware
 mkdir firmware/build
 cd firmware/build
 cmake ..
