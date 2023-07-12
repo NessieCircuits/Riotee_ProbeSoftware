@@ -72,6 +72,13 @@ int sbw_dev_halt(void);
 int sbw_dev_release(void);
 
 /**
+ * @brief Executes power on reset
+ *
+ * @return int 0 on success, <0 otherwise
+ */
+int sbw_dev_reset(void);
+
+/**
  * Loads an address into the PC register
  *
  * @param addr address to load

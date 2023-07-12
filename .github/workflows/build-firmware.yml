@@ -1,0 +1,41 @@
+name: Firmware build
+
+on:
+  push:
+  workflow_call:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: lukstep/raspberry-pi-pico-sdk:latest
+    strategy:
+      matrix:
+        board: [riotee_board, riotee_probe]
+    defaults:
+      run:
+        working-directory: firmware
+
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        submodules: true
+
+    - name: Create build and output directory
+      run: mkdir build artifacts
+
+    - name: Configure cmake
+      run: cd build && cmake ..
+      env:
+        PICO_BOARD: ${{ matrix.board }}
+
+    - name: Build code
+      run: cd build && make
+
+    - run: mv build/rioteeprobe.uf2 bin_${{matrix.board}}.uf2
+  
+    - name: Upload artifacts to github
+      uses: actions/upload-artifact@v3
+      with:
+        name: bin_${{ matrix.board }}
+        path: firmware/bin_${{matrix.board}}.uf2

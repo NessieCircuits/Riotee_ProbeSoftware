@@ -1,0 +1,28 @@
+name: Python build
+
+on:
+  push:
+  workflow_call:
+
+jobs:
+  build-tool:
+    runs-on: ubuntu-latest
+    container:
+      image: python:latest
+    defaults:
+      run:
+        working-directory: ./tool
+    steps:
+
+    - uses: actions/checkout@v3
+
+    - name: Install build dependencies
+      run: pip install flit build
+
+    - run: python -m build
+
+    - name: Upload artifacts to github
+      uses: actions/upload-artifact@v3
+      with:
+        name: riotee_probe_tool
+        path: tool/dist/

@@ -43,7 +43,6 @@
 #include "get_serial.h"
 #include "rioteeprobe_config.h"
 #include "sbw_device.h"
-#include "sbw_protocol.h"
 
 // UART0 for Rioteeprobe debug
 // UART1 for Rioteeprobe to target device
@@ -51,43 +50,13 @@
 #define UART_TASK_PRIO (tskIDLE_PRIORITY + 3)
 #define TUD_TASK_PRIO (tskIDLE_PRIORITY + 2)
 #define DAP_TASK_PRIO (tskIDLE_PRIORITY + 1)
-#define SBW_TASK_PRIO (tskIDLE_PRIORITY + 1)
 
-static TaskHandle_t dap_taskhandle, sbw_taskhandle, tud_taskhandle;
-static MessageBufferHandle_t dap_req_buf, sbw_req_buf;
+static TaskHandle_t dap_taskhandle, tud_taskhandle;
+static MessageBufferHandle_t dap_req_buf;
 
-/* Protects access to programming hardware */
-static SemaphoreHandle_t programming_mutex;
-static SemaphoreHandle_t target_power_smphr;
+int programming_enable(void);
 
-int target_power_enable(void) {
-  xSemaphoreGive(target_power_smphr);
-  gpio_put(PROBE_PIN_TARGET_POWER, 1);
-  return 0;
-}
-
-int target_power_disable(void) {
-  xSemaphoreTake(target_power_smphr, 0);
-  /* Only switch off power if we're the last one using it*/
-  if (uxSemaphoreGetCount(target_power_smphr) == 0)
-    gpio_put(PROBE_PIN_TARGET_POWER, 0);
-  return 0;
-}
-
-int programming_enable(void) {
-  if (xSemaphoreTake(programming_mutex, 0) != pdTRUE)
-    return -1;
-  target_power_enable();
-  gpio_put(PROBE_PIN_TRANS_PROG_EN, 1);
-  return 0;
-}
-
-void programming_disable(void) {
-
-  target_power_disable();
-  gpio_put(PROBE_PIN_TRANS_PROG_EN, 0);
-  xSemaphoreGive(programming_mutex);
-}
+int programming_disable(void);
 
 void usb_thread(void *ptr) {
   do {
@@ -112,7 +81,12 @@ void dap_thread(void *ptr) {
   uint8_t req_buf[CFG_TUD_VENDOR_EPSIZE];
   uint8_t rsp_buf[CFG_TUD_VENDOR_EPSIZE];
 
+  sbw_pins_t pins = {.sbw_tck = PROBE_PIN_SBWCLK,
+                     .sbw_tdio = PROBE_PIN_SBWIO,
+                     .sbw_dir = PROBE_PIN_PROG_DIR};
+
   DAP_Setup();
+  sbw_dev_setup(&pins);
 
   while (1) {
     xMessageBufferReceive(dap_req_buf, req_buf, CFG_TUD_VENDOR_EPSIZE,
@@ -124,7 +98,6 @@ void dap_thread(void *ptr) {
         tud_vendor_write(rsp_buf, ((4U << 16) | 1U));
         continue;
       }
-      programming_enable();
     } else if (req_buf[0] == ID_DAP_Disconnect) {
       programming_disable();
       gpio_put(PROBE_PIN_LED, 0);
@@ -134,93 +107,8 @@ void dap_thread(void *ptr) {
 
     resp_len = DAP_ProcessCommand(req_buf, rsp_buf);
     tud_vendor_write(rsp_buf, resp_len);
+    tud_vendor_flush();
   }
-}
-
-/* This callback is invoked when the RX endpoint has data */
-void tud_cdc_rx_cb(uint8_t itf) {
-  uint32_t req_buf[CFG_TUD_CDC_RX_BUFSIZE];
-
-  if (itf != 1)
-    return;
-
-  int req_len = tud_cdc_n_read(itf, req_buf, sizeof(req_buf));
-  xMessageBufferSend(sbw_req_buf, req_buf, req_len, portMAX_DELAY);
-}
-
-/* Processes requests and prepares response. Returns number of bytes in
- * response. */
-int SBW_ProcessCommand(sbw_req_t *request, sbw_rsp_t *response) {
-
-  gpio_put(PROBE_PIN_LED, !gpio_get(PROBE_PIN_LED));
-
-  switch (request->req_type) {
-  case SBW_REQ_START:
-    if (programming_enable() != 0) {
-      response->rc = SBW_RC_ERR_GENERIC;
-      return 1;
-    }
-    response->rc = sbw_dev_connect();
-    return 1;
-  case SBW_REQ_STOP:
-    response->rc = sbw_dev_disconnect();
-    programming_disable();
-    gpio_put(PROBE_PIN_LED, 0);
-
-    return 1;
-  case SBW_REQ_HALT:
-    response->rc = sbw_dev_halt();
-    return 1;
-  case SBW_REQ_RELEASE:
-    response->rc = sbw_dev_release();
-    return 1;
-  case SBW_REQ_WRITE:
-    response->rc =
-        sbw_dev_mem_write(request->address, request->data, request->len);
-    return 1;
-  case SBW_REQ_READ:
-    response->rc =
-        sbw_dev_mem_read(response->data, request->address, request->len);
-    response->len = request->len;
-    return 2 + (response->len * 2);
-  case SBW_REQ_POWER:
-    if (request->data[0] == TARGET_POWER_ON) {
-      response->rc = target_power_enable();
-      return 1;
-    } else if (request->data[0] == TARGET_POWER_OFF) {
-      response->rc = target_power_disable();
-      return 1;
-    } else {
-      response->rc = SBW_RC_ERR_GENERIC;
-      return 1;
-    }
-  default:
-    response->rc = SBW_RC_ERR_UNKNOWN_REQ;
-    return 1;
-  }
-}
-
-/* Processes commands received via USB */
-void sbw_thread(void *ptr) {
-  sbw_req_t request;
-  sbw_rsp_t response;
-  sbw_pins_t pins = {.sbw_tck = PROBE_PIN_SBWCLK,
-                     .sbw_tdio = PROBE_PIN_SBWIO,
-                     .sbw_dir = PROBE_PIN_PROG_DIR};
-
-  sbw_dev_setup(&pins);
-
-  do {
-    /* Fetch command from buffer */
-    xMessageBufferReceive(sbw_req_buf, &request, sizeof(sbw_req_t),
-                          portMAX_DELAY);
-
-    int rsp_len = SBW_ProcessCommand(&request, &response);
-
-    /* Send the response packet */
-    tud_cdc_n_write(1, &response, rsp_len);
-    tud_cdc_n_write_flush(1);
-  } while (1);
 }
 
 int main(void) {
@@ -234,37 +122,58 @@ int main(void) {
   gpio_set_dir(PROBE_PIN_LED, GPIO_OUT);
   gpio_put(PROBE_PIN_LED, 0);
 
+  /* Enables/disables constant voltage supply for target */
   gpio_init(PROBE_PIN_TARGET_POWER);
   gpio_set_dir(PROBE_PIN_TARGET_POWER, GPIO_OUT);
+
+  /* Enables/disables supply of programming level translators */
   gpio_init(PROBE_PIN_TRANS_PROG_EN);
   gpio_set_dir(PROBE_PIN_TRANS_PROG_EN, GPIO_OUT);
+
+  /* Enables/disables supply of UARTRX level translator */
   gpio_init(PROBE_PIN_TRANS_UARTRX_EN);
   gpio_set_dir(PROBE_PIN_TRANS_UARTRX_EN, GPIO_OUT);
+  gpio_put(PROBE_PIN_TRANS_UARTRX_EN, false);
+
+  gpio_init(PROBE_PIN_TRANS_UARTRX_DIR);
+  gpio_set_dir(PROBE_PIN_TRANS_UARTRX_DIR, GPIO_OUT);
+  gpio_put(PROBE_PIN_TRANS_UARTRX_DIR, false);
+
+  /* Enables/disables supply of UARTTX level translator */
   gpio_init(PROBE_PIN_TRANS_UARTTX_EN);
   gpio_set_dir(PROBE_PIN_TRANS_UARTTX_EN, GPIO_OUT);
+  gpio_put(PROBE_PIN_TRANS_UARTTX_EN, 1);
 
+  /* Controls direction of programming level translator */
   gpio_init(PROBE_PIN_PROG_DIR);
   gpio_set_dir(PROBE_PIN_PROG_DIR, GPIO_OUT);
   gpio_put(PROBE_PIN_PROG_DIR, false);
 
+#ifdef BOARD_RIOTEE_PROBE
+  gpio_init(PROBE_PIN_GPIO0);
+  gpio_init(PROBE_PIN_GPIO1);
+  gpio_init(PROBE_PIN_GPIO2);
+  gpio_init(PROBE_PIN_GPIO3);
+#endif
+
+#ifdef BOARD_RIOTEE_BOARD
+  gpio_init(PROBE_PIN_BYPASS_ENABLE);
+  gpio_set_dir(PROBE_PIN_BYPASS_ENABLE, GPIO_OUT);
+  gpio_put(PROBE_PIN_BYPASS_ENABLE, false);
+
+#endif
+
   printf("Welcome to Rioteeprobe!\n");
 
   dap_req_buf = xMessageBufferCreate(256);
-  sbw_req_buf = xMessageBufferCreate(256);
-
-  programming_mutex = xSemaphoreCreateMutex();
-  target_power_smphr = xSemaphoreCreateCounting(4, 0);
 
   /* UART needs to preempt USB as if we don't, characters get lost */
   xTaskCreate(cdc_thread, "UART", configMINIMAL_STACK_SIZE, NULL,
               UART_TASK_PRIO, &uart_taskhandle);
   xTaskCreate(usb_thread, "TUD", configMINIMAL_STACK_SIZE, NULL, TUD_TASK_PRIO,
               &tud_taskhandle);
-
   xTaskCreate(dap_thread, "DAP", configMINIMAL_STACK_SIZE, NULL, DAP_TASK_PRIO,
               &dap_taskhandle);
-  xTaskCreate(sbw_thread, "SBW", configMINIMAL_STACK_SIZE, NULL, SBW_TASK_PRIO,
-              &sbw_taskhandle);
 
   vTaskStartScheduler();
 

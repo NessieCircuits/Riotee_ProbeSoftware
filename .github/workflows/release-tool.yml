@@ -1,0 +1,27 @@
+name: Release Python package
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  call-build:
+    uses: ./.github/workflows/build-tool.yml
+  release-tool:
+    name: Release Python package to PyPI
+    runs-on: ubuntu-latest
+    container:
+      image: python:latest
+
+    needs: call-build
+    steps:
+
+    - run: pip install twine
+  
+    - uses: actions/download-artifact@v3
+      with:
+        name: riotee_probe_tool
+
+    - name: Publish package to PyPI
+      run: python -m twine upload -u __token__ -p ${{ secrets.PYPI_TOKEN }} ./*

@@ -64,7 +64,7 @@ extern "C" {
 
 //------------- CLASS -------------//
 #define CFG_TUD_HID 0
-#define CFG_TUD_CDC 2
+#define CFG_TUD_CDC 1
 #define CFG_TUD_MSC 0
 #define CFG_TUD_MIDI 0
 #define CFG_TUD_VENDOR 1
@@ -74,6 +74,10 @@ extern "C" {
 
 #define CFG_TUD_VENDOR_RX_BUFSIZE 8192
 #define CFG_TUD_VENDOR_TX_BUFSIZE 8192
+
+#ifndef TUD_OPT_RP2040_USB_DEVICE_UFRAME_FIX
+#define TUD_OPT_RP2040_USB_DEVICE_UFRAME_FIX 1
+#endif
 
 #ifdef __cplusplus
 }

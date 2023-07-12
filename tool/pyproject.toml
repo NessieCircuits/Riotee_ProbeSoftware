@@ -1,0 +1,24 @@
+[build-system]
+requires = ["flit_core >=3.2,<4"]
+build-backend = "flit_core.buildapi"
+
+[project]
+name = "riotee-probe"
+authors = [{name = "Kai Geissdoerfer", email = "info@nessie-circuits.de"}]
+license = {file = "LICENSE.txt"}
+classifiers = ["License :: OSI Approved :: MIT License"]
+dynamic = ["version", "description"]
+dependencies = [
+    "numpy",
+    "intelhex",
+    "click",
+    "pyserial",
+    "progress",
+    "pyocd",
+]
+
+[project.scripts]
+riotee-probe = "riotee_probe.cli:cli"
+
+[tool.black]
+line-length = 120

@@ -10,12 +10,25 @@ enum {
   SBW_REQ_RELEASE,
   SBW_REQ_WRITE,
   SBW_REQ_READ,
-  SBW_REQ_POWER
+  SBW_REQ_POWER,
+  SBW_REQ_IOSET,
+  SBW_REQ_IOGET,
+  SBW_REQ_BYPASS,
 };
 
 enum { TARGET_POWER_OFF = 0, TARGET_POWER_ON = 1 };
+enum { BYPASS_OFF = 0, BYPASS_ON = 1 };
+enum { IOSET_OUT_LOW = 0, IOSET_OUT_HIGH = 1, IOSET_IN = 2 };
+enum { IOGET_LOW = 0, IOGET_HIGH = 1 };
 
-enum { SBW_RC_OK, SBW_RC_ERR_GENERIC, SBW_RC_ERR_UNKNOWN_REQ };
+typedef uint8_t probe_io_state_t;
+
+enum {
+  SBW_RC_OK,
+  SBW_RC_ERR_GENERIC,
+  SBW_RC_ERR_UNKNOWN_REQ,
+  SBW_RC_ERR_UNSUPPORTED
+};
 
 /* Format of packets received from the host */
 typedef struct __attribute__((packed)) {

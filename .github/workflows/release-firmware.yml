@@ -1,0 +1,32 @@
+name: Release firmware
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+permissions:
+  contents: write
+
+jobs:
+  call-build:
+    uses: ./.github/workflows/build-firmware.yml
+  release-firmware:
+    runs-on: ubuntu-latest
+    needs: call-build
+    strategy:
+      matrix:
+        board: [riotee_board, riotee_probe]
+    steps:
+      - run: mkdir output
+
+      - uses: actions/download-artifact@v3
+        with:
+          name: bin_${{matrix.board}}
+
+      - run: mv bin_${{matrix.board}}.uf2 probe_${{matrix.board}}_${{github.ref_name}}.uf2
+
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: probe_${{matrix.board}}_${{github.ref_name}}.uf2
