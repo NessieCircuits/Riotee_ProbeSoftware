@@ -1,10 +1,10 @@
-# Riotee Probe Firmware
+# Riotee Probe Software
 
 [![Firmware build](https://github.com/NessieCircuits/Riotee_ProbeFirmware/actions/workflows/build-firmware.yml/badge.svg)](https://github.com/NessieCircuits/Riotee_ProbeFirmware/actions/workflows/build-firmware.yml)
 [![Python build](https://github.com/NessieCircuits/Riotee_ProbeFirmware/actions/workflows/build-tool.yml/badge.svg)](https://github.com/NessieCircuits/Riotee_ProbeFirmware/actions/workflows/build-tool.yml)
 [![PyPiVersion](https://img.shields.io/pypi/v/riotee_probe.svg)](https://pypi.org/project/riotee_probe)
 
-This repository hosts the firmware running on the [Riotee Probe](https://github.com/NessieCircuits/Riotee_ProbeHardware) and the [Riotee Board](https://github.com/NessieCircuits/Riotee_Board) and a command line tool to interact with the probe via USB. The Riotee Board and Riotee Probe have a Raspberry Pi RP2040 that is connected to a PC via USB and controls programming and debugging of the microcontrollers inside the Riotee module.
+This repository hosts the firmware running on the [Riotee Probe](https://github.com/NessieCircuits/Riotee_ProbeHardware) and the [Riotee Board](https://github.com/NessieCircuits/Riotee_Board) and a command line tool for controlling the probe via USB. The Riotee Board and Riotee Probe have a Raspberry Pi RP2040 that is connected to a PC via USB and controls programming and debugging of the microcontrollers inside the Riotee module.
 
 Features:
  - Programming of the MSP430FR5962 on the Riotee Module
