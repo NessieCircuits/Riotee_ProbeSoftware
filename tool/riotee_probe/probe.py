@@ -54,6 +54,7 @@ class RioteeProbe(object):
 
     def fw_version(self) -> str:
         ret = self._session.vendor_cmd(ReqType.ID_DAP_VENDOR_VERSION)
+        # Firmware versions before 1.0.3 send a trailing nul over the wire
         return str(ret.strip(b'\0'), encoding="utf-8")
 
 

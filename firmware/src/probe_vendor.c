@@ -135,8 +135,9 @@ uint32_t DAP_ProcessVendorCommand(const uint8_t *request, uint8_t *response) {
 
   switch (request[0]) {
   case ID_DAP_VENDOR_VERSION:
-    memcpy(response + 2, version_string, sizeof(version_string));
-    rsp_len += sizeof(version_string);
+    // -1: Stripping the trailing nul byte
+    memcpy(response + 2, version_string, sizeof(version_string) - 1);
+    rsp_len += sizeof(version_string) - 1;
     break;
   case ID_DAP_VENDOR_GPIO_SET:
     probe_ioset(request[1], request[2]);
