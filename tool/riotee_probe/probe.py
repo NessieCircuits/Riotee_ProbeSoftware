@@ -54,7 +54,7 @@ class RioteeProbe(object):
 
     def fw_version(self) -> str:
         ret = self._session.vendor_cmd(ReqType.ID_DAP_VENDOR_VERSION)
-        return str(ret, encoding="utf-8")
+        return str(ret.strip(b'\0'), encoding="utf-8")
 
 
 class RioteeProbeProbe(RioteeProbe):
