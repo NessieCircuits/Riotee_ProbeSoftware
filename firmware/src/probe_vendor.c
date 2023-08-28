@@ -13,7 +13,7 @@
 #include "sbw_protocol.h"
 
 /* Used to identify FW version. Updated with bumpversion. */
-const char version_string[] = "1.0.2";
+const char version_string[] = "1.1.0";
 
 #define ID_DAP_VENDOR_VERSION ID_DAP_Vendor0
 #define ID_DAP_VENDOR_POWER ID_DAP_Vendor1
