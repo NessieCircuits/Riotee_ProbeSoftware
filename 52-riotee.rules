@@ -1,0 +1,10 @@
+# udev rules for Riotee devices
+#
+# This will allow any user in the `plugdev` group to access Riotee devices
+
+# Riotee Board
+SUBSYSTEMS=="usb", ATTRS{idVendor}=="1209", ATTRS{idProduct}=="c8a0", MODE="660", GROUP="plugdev", TAG+="uaccess"
+# Riotee Probe
+SUBSYSTEMS=="usb", ATTRS{idVendor}=="1209", ATTRS{idProduct}=="c8a1", MODE="660", GROUP="plugdev", TAG+="uaccess"
+# Riotee Gateway
+SUBSYSTEMS=="usb", ATTRS{idVendor}=="1209", ATTRS{idProduct}=="c8a2", MODE="660", GROUP="plugdev", TAG+="uaccess"
