@@ -11,7 +11,7 @@ dynamic = ["version", "description"]
 dependencies = [
     "numpy",
     "intelhex",
-    "click",
+    "click>=8.1.0",
     "pyserial",
     "progress",
     "pyocd",
