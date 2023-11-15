@@ -1,14 +1,18 @@
 from contextlib import contextmanager
+from pathlib import Path
+from typing import Generator
+
 import click
 from progress.bar import Bar
-from riotee_probe.probe import get_connected_probe
-from riotee_probe.probe import GpioDir
+from .target import Target
+from .probe import get_connected_probe
+from .probe import GpioDir
 
 device_option = click.option("-d", "--device", type=click.Choice(["msp430", "nrf52"]), default="nrf52")
 
 
 @contextmanager
-def get_target(device):
+def get_target(device: str) -> Generator[Target, None, None]:
     with get_connected_probe() as probe:
         if device == "nrf52":
             target_gen = probe.nrf52
@@ -20,14 +24,14 @@ def get_target(device):
 
 
 @click.group
-def cli():
+def cli() -> None:
     pass
 
 
 @cli.command(short_help="Control power supply bypass (Board only)")
 @click.option("--on/--off", required=True)
 @click.pass_context
-def bypass(ctx, on):
+def bypass(ctx: click.Context, on: bool) -> None:
     with get_connected_probe() as probe:
         probe.bypass(on)
 
@@ -35,7 +39,7 @@ def bypass(ctx, on):
 @cli.command(short_help="Control target power supply")
 @click.option("--on/--off", required=True)
 @click.pass_context
-def target_power(ctx, on):
+def target_power(ctx: click.Context, on: bool) -> None:
     with get_connected_probe() as probe:
         probe.target_power(on)
 
@@ -43,11 +47,11 @@ def target_power(ctx, on):
 @cli.command
 @device_option
 @click.option("-f", "--firmware", type=click.Path(exists=True), required=True)
-def program(device, firmware):
+def program(device: str, firmware: Path) -> None:
     with get_target(device) as target:
         bar = Bar("Uploading..", max=100)
 
-        def update_bar(fraction):
+        def update_bar(fraction: float):
             bar.goto(100 * fraction)
 
         target.program(firmware, progress=update_bar)
@@ -56,27 +60,27 @@ def program(device, firmware):
 
 @cli.command
 @device_option
-def reset(device):
+def reset(device: str) -> None:
     with get_target(device) as target:
         target.reset()
 
 
 @cli.command
 @device_option
-def halt(device):
+def halt(device: str) -> None:
     with get_target(device) as target:
         target.halt()
 
 
 @cli.command
 @device_option
-def resume(device):
+def resume(device: str) -> None:
     with get_target(device) as target:
         target.resume()
 
 
 @cli.group(short_help="Control GPIOs (Probe only)")
-def gpio():
+def gpio() -> None:
     pass
 
 
@@ -89,7 +93,7 @@ def gpio():
     required=True,
     help="Pin direction",
 )
-def dir(pin_no, direction):
+def dir(pin_no: int, direction: str) -> None:
     with get_connected_probe() as probe:
         if direction == "in":
             probe.gpio_dir(pin_no, GpioDir.GPIO_DIR_IN)
@@ -106,7 +110,7 @@ def dir(pin_no, direction):
     required=True,
     help="Pin state",
 )
-def set(pin_no, state):
+def set(pin_no: int, state: str) -> None:
     with get_connected_probe() as probe:
         if state in ["high", "1"]:
             probe.gpio_set(pin_no, True)
@@ -116,7 +120,7 @@ def set(pin_no, state):
 
 @gpio.command(short_help="Read GPIO pin")
 @click.option("--pin-no", "-p", type=int, required=True, help="Pin number")
-def get(pin_no):
+def get(pin_no: int) -> None:
     with get_connected_probe() as probe:
         state = probe.gpio_get(pin_no)
         click.echo(state)

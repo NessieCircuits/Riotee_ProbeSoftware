@@ -1,28 +1,18 @@
 from enum import Enum
 import struct
 from contextlib import contextmanager
+from typing import Generator
 
-from riotee_probe.protocol import ReqType
-from riotee_probe.protocol import IOSetState
-from riotee_probe.session import RioteeProbeSession
-from riotee_probe.target import TargetNRF52
-from riotee_probe.target import TargetMSP430
+from .protocol import ReqType
+from .protocol import IOSetState
+from .session import RioteeProbeSession
+from .target import TargetNRF52
+from .target import TargetMSP430
 
 
 class GpioDir(Enum):
     GPIO_DIR_IN = 0
     GPIO_DIR_OUT = 1
-
-
-@contextmanager
-def get_connected_probe():
-    with RioteeProbeSession() as session:
-        if session.product_name == "Riotee Board":
-            yield RioteeProbeBoard(session)
-        elif session.product_name == "Riotee Probe":
-            yield RioteeProbeProbe(session)
-        else:
-            raise Exception(f"Unsupported probe {session.product_name} selected")
 
 
 class RioteeProbe:
@@ -49,7 +39,7 @@ class RioteeProbe:
     def gpio_get(self, pin: int):
         raise NotImplementedError
 
-    def bypass(self, state):
+    def bypass(self, state: bool):
         raise NotImplementedError
 
     def fw_version(self) -> str:
@@ -57,8 +47,19 @@ class RioteeProbe:
         return str(ret, encoding="utf-8")
 
 
+@contextmanager
+def get_connected_probe() -> Generator[RioteeProbe, None, None]:
+    with RioteeProbeSession() as session:
+        if session.product_name == "Riotee Board":
+            yield RioteeProbeBoard(session)
+        elif session.product_name == "Riotee Probe":
+            yield RioteeProbeProbe(session)
+        else:
+            raise Exception(f"Unsupported probe {session.product_name} selected")
+
+
 class RioteeProbeProbe(RioteeProbe):
-    def gpio_set(self, pin: int, state: bool):
+    def gpio_set(self, pin: int, state: bool) -> None:
         if state:
             pkt = struct.pack("=BB", pin, IOSetState.IOSET_OUT_HIGH)
         else:
@@ -72,7 +73,7 @@ class RioteeProbeProbe(RioteeProbe):
         rsp = self._session.vendor_cmd(ReqType.ID_DAP_VENDOR_GPIO_GET, pkt)
         return bool(rsp[0])
 
-    def gpio_dir(self, pin: int, dir: GpioDir):
+    def gpio_dir(self, pin: int, dir: GpioDir) -> None:
         if dir == GpioDir.GPIO_DIR_IN:
             pkt = struct.pack("=BB", pin, IOSetState.IOSET_IN)
         else:

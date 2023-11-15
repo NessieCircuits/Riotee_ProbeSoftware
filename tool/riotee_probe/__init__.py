@@ -1,11 +1,20 @@
 """Riotee Probe Python package"""
+from .probe import RioteeProbe
+from .probe import RioteeProbeProbe
+from .probe import RioteeProbeBoard
+from .target import TargetNRF52
+from .target import TargetMSP430
+from .probe import GpioDir
+from .probe import get_connected_probe
 
 __version__ = "1.0.2"
 
-from riotee_probe.probe import RioteeProbe
-from riotee_probe.probe import RioteeProbeProbe
-from riotee_probe.probe import RioteeProbeBoard
-from riotee_probe.target import TargetNRF52
-from riotee_probe.target import TargetMSP430
-from riotee_probe.probe import GpioDir
-from riotee_probe.probe import get_connected_probe
+__all__ = [
+    "RioteeProbe",
+    "RioteeProbeProbe",
+    "RioteeProbeBoard",
+    "TargetNRF52",
+    "TargetMSP430",
+    "GpioDir",
+    "get_connected_probe",
+]

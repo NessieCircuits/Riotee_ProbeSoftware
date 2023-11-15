@@ -1,60 +1,62 @@
+from typing_extensions import Self
+
 from pyocd.flash.file_programmer import FileProgrammer
 from pathlib import Path
 import numpy as np
 import struct
-from typing import Sequence
+from typing import Sequence, Optional
 from typing import Union
 from typing import Callable
 
-from riotee_probe.protocol import *
-from riotee_probe.session import RioteeProbeSession
-from riotee_probe.intelhex import IntelHex16bitReader
+from .protocol import ReqType, DAP_VENDOR_MAX_PKT_SIZE
+from .session import RioteeProbeSession
+from .intelhex import IntelHex16bitReader
 
 
 class Target:
-    def __init__(self, session: RioteeProbeSession):
+    def __init__(self, session: RioteeProbeSession) -> None:
         self._session = session
 
-    def __enter__(self):
+    def __enter__(self) -> Self:
         return self
 
-    def __exit__(self, *exc):
+    def __exit__(self, *exc) -> None:
         pass
 
-    def halt(self):
+    def halt(self) -> None:
         raise NotImplementedError
 
-    def reset(self):
+    def reset(self) -> None:
         raise NotImplementedError
 
-    def resume(self):
+    def resume(self) -> None:
         raise NotImplementedError
 
-    def write(self, addr, data):
+    def write(self, addr, data) -> None:
         raise NotImplementedError
 
-    def read(self, addr, n: int):
+    def read(self, addr, n: int) -> None:
         raise NotImplementedError
 
-    def program(self, fw_path: Path, progress: Callable = None):
+    def program(self, fw_path: Path, progress: Optional[Callable] = None) -> None:
         raise NotImplementedError
 
 
 class TargetMSP430(Target):
-    def __enter__(self):
+    def __enter__(self) -> Self:
         self._session.vendor_cmd(ReqType.ID_DAP_VENDOR_SBW_CONNECT)
         return self
 
-    def __exit__(self, *exc):
+    def __exit__(self, *exc) -> None:
         self._session.vendor_cmd(ReqType.ID_DAP_VENDOR_SBW_DISCONNECT)
 
-    def reset(self):
+    def reset(self) -> None:
         self._session.vendor_cmd(ReqType.ID_DAP_VENDOR_SBW_RESET)
 
-    def resume(self):
+    def resume(self) -> None:
         self._session.vendor_cmd(ReqType.ID_DAP_VENDOR_SBW_RESUME)
 
-    def halt(self):
+    def halt(self) -> None:
         self._session.vendor_cmd(ReqType.ID_DAP_VENDOR_SBW_HALT)
 
     def write(self, addr: int, data: Union[Sequence[np.uint16], np.uint16]):
@@ -67,9 +69,9 @@ class TargetMSP430(Target):
         if len(pkt) >= DAP_VENDOR_MAX_PKT_SIZE:
             raise ValueError("Data length exceeds maximum packet size")
 
-        rsp = self._session.vendor_cmd(ReqType.ID_DAP_VENDOR_SBW_WRITE, pkt)
+        _ = self._session.vendor_cmd(ReqType.ID_DAP_VENDOR_SBW_WRITE, pkt)
 
-    def read(self, addr, n_words: int = 1):
+    def read(self, addr, n_words: int = 1) -> np.ndarray:
         pkt = struct.pack("=IB", addr, n_words)
         rsp = self._session.vendor_cmd(ReqType.ID_DAP_VENDOR_SBW_READ, pkt)
         rsp_arr = np.frombuffer(rsp, dtype=np.uint16)
@@ -78,7 +80,7 @@ class TargetMSP430(Target):
         else:
             return rsp_arr
 
-    def program(self, fw_path: Path, progress: Callable = None, verify: bool = True):
+    def program(self, fw_path: Path, progress: Optional[Callable] = None, verify: bool = True) -> None:
         ih = IntelHex16bitReader()
         ih.loadhex(fw_path)
 
@@ -99,19 +101,19 @@ class TargetMSP430(Target):
 
 
 class TargetNRF52(Target):
-    def __enter__(self):
+    def __enter__(self) -> Self:
         self._session._board.init()
         self._session._inited = True
         return self
 
-    def __exit__(self, *exc):
+    def __exit__(self, *exc) -> None:
         try:
             self._session._board.uninit()
         except Exception as e:
             print("Error during board uninit:", e)
         self._session._inited = False
 
-    def program(self, fw_path: Path, progress: Callable = None):
+    def program(self, fw_path: Path, progress: Optional[Callable] = None) -> None:
         if progress is None:
 
             def progress(arg):
@@ -119,16 +121,16 @@ class TargetNRF52(Target):
 
         FileProgrammer(self._session, progress=progress).program(str(fw_path))
 
-    def halt(self):
+    def halt(self) -> None:
         self._session.board.target.halt()
 
-    def reset(self):
+    def reset(self) -> None:
         self._session.board.target.reset()
 
-    def resume(self):
+    def resume(self) -> None:
         self._session.board.target.resume()
 
-    def write(self, addr, data: Union[Sequence[np.uint32], np.uint32]):
+    def write(self, addr, data: Union[Sequence[np.uint32], np.uint32]) -> None:
         if hasattr(data, "__len__"):
             self._session.board.target.write_memory_block32(addr, data)
         else:
