@@ -1,13 +1,15 @@
+import sys
 from contextlib import contextmanager
 from pathlib import Path
 from typing import Generator
-import sys
 
 import click
 from progress.bar import Bar
-from .target import Target
-from .probe import get_connected_probe
+
 from .probe import GpioDir
+from .probe import get_connected_probe
+from .target import Target
+from .session import get_all_probe_sessions
 
 device_option = click.option("-d", "--device", type=click.Choice(["msp430", "nrf52"]), default="nrf52")
 
@@ -52,7 +54,7 @@ def program(device: str, firmware: Path) -> None:
     with get_target(device) as target:
         bar = Bar("Uploading..", max=100)
 
-        def update_bar(fraction: float):
+        def update_bar(fraction: float) -> None:
             bar.goto(100 * fraction)
 
         target.program(firmware, progress=update_bar)
@@ -128,17 +130,18 @@ def get(pin_no: int) -> None:
 
 
 @cli.command
-def list():
+def list() -> None:
     """Show any connected device and its firmware version"""
-    from . import session
+
     printed = False
-    for details in session.get_all():
+    for details in get_all_probe_sessions():
         if not printed:
-            print(" ".join("%-20s" % k for k in details.keys()))
+            print(" ".join("%-20s" % key for key in details))
             printed = True
         print(" ".join("%-20s" % v for v in details.values()))
     if not printed:
         print("No probes are currently connected", file=sys.stderr)
+
 
 if __name__ == "__main__":
     cli()

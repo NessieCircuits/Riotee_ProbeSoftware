@@ -1,13 +1,14 @@
-from typing import Optional
-
-from typing_extensions import Self
+from typing import Generator, Optional
 
 from pyocd.core.helpers import ConnectHelper
 from pyocd.core.session import Session
-from .protocol import DapRetCode
-from .protocol import ID_DAP_VENDOR0
+from typing_extensions import Self
 
-def get_all():
+from .protocol import ID_DAP_VENDOR0, DapRetCode
+from .probe import RioteeProbe
+
+
+def get_all_probe_sessions() -> Generator[dict]:
     for probe in ConnectHelper.get_all_connected_probes(blocking=False):
         # Similar steps to RioteeProbeSession, may be deduplicated later.
         #
@@ -18,18 +19,18 @@ def get_all():
         Session.__init__(session, probe, target_override="nrf52")
         session.open(init_board=False)
 
-        if probe.vendor_name != 'Nessie Circuits':
+        if probe.vendor_name != "Nessie Circuits":
             # Getting the firmware version would fail, as would any get/set pin
             # command -- or worse, it'd do something unexpected.
             continue
 
-        from .probe import RioteeProbe
         riotee_probe = RioteeProbe(session)
         fw = riotee_probe.fw_version()
 
         yield {"Product name": probe.product_name, "Unique ID": probe.unique_id, "Firmware version": fw}
 
         session.close()
+
 
 class RioteeProbeSession(Session):
     def __init__(self) -> None:

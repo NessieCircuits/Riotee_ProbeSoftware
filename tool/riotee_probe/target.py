@@ -1,16 +1,14 @@
+import struct
+from pathlib import Path
+from typing import Callable, Optional, Sequence, Union
+
+import numpy as np
+from pyocd.flash.file_programmer import FileProgrammer
 from typing_extensions import Self
 
-from pyocd.flash.file_programmer import FileProgrammer
-from pathlib import Path
-import numpy as np
-import struct
-from typing import Sequence, Optional
-from typing import Union
-from typing import Callable
-
-from .protocol import ReqType, DAP_VENDOR_MAX_PKT_SIZE
-from .session import RioteeProbeSession
 from .intelhex import IntelHex16bitReader
+from .protocol import DAP_VENDOR_MAX_PKT_SIZE, ReqType
+from .session import RioteeProbeSession
 
 
 class Target:
@@ -59,7 +57,7 @@ class TargetMSP430(Target):
     def halt(self) -> None:
         self._session.vendor_cmd(ReqType.ID_DAP_VENDOR_SBW_HALT)
 
-    def write(self, addr: int, data: Union[Sequence[np.uint16], np.uint16]):
+    def write(self, addr: int, data: Union[Sequence[np.uint16], np.uint16]) -> None:
         if hasattr(data, "__len__"):
             pkt = struct.pack(f"=IB{len(data)}H", addr, len(data), *data)
         else:
@@ -77,8 +75,7 @@ class TargetMSP430(Target):
         rsp_arr = np.frombuffer(rsp, dtype=np.uint16)
         if n_words == 1:
             return rsp_arr[0]
-        else:
-            return rsp_arr
+        return rsp_arr
 
     def program(self, fw_path: Path, progress: Optional[Callable] = None, verify: bool = True) -> None:
         ih = IntelHex16bitReader()
@@ -116,7 +113,7 @@ class TargetNRF52(Target):
     def program(self, fw_path: Path, progress: Optional[Callable] = None) -> None:
         if progress is None:
 
-            def progress(arg):
+            def progress(_) -> None:
                 pass
 
         FileProgrammer(self._session, progress=progress).program(str(fw_path))
@@ -139,5 +136,4 @@ class TargetNRF52(Target):
     def read(self, addr, n_words: int = 1):
         if n_words == 1:
             return self._session.board.target.read_memory(addr)
-        else:
-            return self._session.board.target.read_memory_block32(addr, n_words)
+        return self._session.board.target.read_memory_block32(addr, n_words)

@@ -1,24 +1,24 @@
 from typing import Generator, Tuple, Any
 
-from intelhex import IntelHex
 import numpy as np
+from intelhex import IntelHex
 
 
-class PacketOverflowException(Exception):
+class PacketOverflowError(Exception):
     pass
 
 
 class Packet16bit:
     def __init__(self, address: int, max_size: int) -> None:
         self._max_size = max_size
-        self._buffer = list()
+        self._buffer = []
         self.address = address
 
     def append(self, value: int) -> None:
         if len(self._buffer) < self._max_size:
             self._buffer.append(value)
         else:
-            raise PacketOverflowException("Packet buffer full")
+            raise PacketOverflowError("Packet buffer full")
 
     def __len__(self) -> int:
         return len(self._buffer)
@@ -29,7 +29,7 @@ class Packet16bit:
 
 
 class IntelHex16bitReader(IntelHex):
-    def __init__(self, source=None) -> None:
+    def __init__(self, source: Any = None) -> None:
         super().__init__(source)
 
     def iter_words(self) -> Generator[Tuple[Any, int], None, None]:
@@ -48,7 +48,7 @@ class IntelHex16bitReader(IntelHex):
                 value = self[addr] + (self[addr + 1] << 8)
                 try:
                     pkt.append(value)
-                except PacketOverflowException:
+                except PacketOverflowError:
                     yield pkt
                     pkt = Packet16bit(addr, pkt_max_size)
                     pkt.append(value)
