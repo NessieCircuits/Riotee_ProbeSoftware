@@ -11,7 +11,7 @@ from riotee_probe.session import RioteeProbeSession
 from riotee_probe.intelhex import IntelHex16bitReader
 
 
-class Target(object):
+class Target:
     def __init__(self, session: RioteeProbeSession):
         self._session = session
 
@@ -61,7 +61,7 @@ class TargetMSP430(Target):
         if hasattr(data, "__len__"):
             pkt = struct.pack(f"=IB{len(data)}H", addr, len(data), *data)
         else:
-            pkt = struct.pack(f"=IBH", addr, 1, data)
+            pkt = struct.pack("=IBH", addr, 1, data)
 
         # One Byte is required for request type
         if len(pkt) >= DAP_VENDOR_MAX_PKT_SIZE:
@@ -70,7 +70,7 @@ class TargetMSP430(Target):
         rsp = self._session.vendor_cmd(ReqType.ID_DAP_VENDOR_SBW_WRITE, pkt)
 
     def read(self, addr, n_words: int = 1):
-        pkt = struct.pack(f"=IB", addr, n_words)
+        pkt = struct.pack("=IB", addr, n_words)
         rsp = self._session.vendor_cmd(ReqType.ID_DAP_VENDOR_SBW_READ, pkt)
         rsp_arr = np.frombuffer(rsp, dtype=np.uint16)
         if n_words == 1:

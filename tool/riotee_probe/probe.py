@@ -25,7 +25,7 @@ def get_connected_probe():
             raise Exception(f"Unsupported probe {session.product_name} selected")
 
 
-class RioteeProbe(object):
+class RioteeProbe:
     def __init__(self, session):
         self._session = session
 

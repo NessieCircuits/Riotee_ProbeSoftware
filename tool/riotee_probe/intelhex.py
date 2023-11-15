@@ -6,7 +6,7 @@ class PacketOverflowException(Exception):
     pass
 
 
-class Packet16bit(object):
+class Packet16bit:
     def __init__(self, address: int, max_size: int):
         self._max_size = max_size
         self._buffer = list()

@@ -1,4 +1,3 @@
-from contextlib import contextmanager
 from pyocd.core.helpers import ConnectHelper
 from pyocd.core.session import Session
 from riotee_probe.protocol import DapRetCode
