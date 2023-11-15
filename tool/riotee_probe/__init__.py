@@ -7,7 +7,7 @@ from .target import TargetMSP430
 from .probe import GpioDir
 from .probe import get_connected_probe
 
-__version__ = "1.0.2"
+__version__ = "1.1.0"
 
 __all__ = [
     "RioteeProbe",

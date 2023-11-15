@@ -27,6 +27,16 @@ Install the command line tool with
 pip install riotee-probe
 ```
 
+## Udev rules (Linux)
+
+To access the Riotee board and Riotee probe without root privileges, copy the [52-riotee.rules](52-riotee.rules) to `/etc/udev/rules.d` on your machine.
+Make sure your user is in the *plugdev* group and reload udev rules with:
+
+```bash
+sudo udevadm control --reload-rules
+sudo udevadm trigger
+```
+
 ## Usage
 
 To list all available commands run

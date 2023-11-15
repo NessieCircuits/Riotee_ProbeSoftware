@@ -1,6 +1,7 @@
 from contextlib import contextmanager
 from pathlib import Path
 from typing import Generator
+import sys
 
 import click
 from progress.bar import Bar
@@ -125,6 +126,19 @@ def get(pin_no: int) -> None:
         state = probe.gpio_get(pin_no)
         click.echo(state)
 
+
+@cli.command
+def list():
+    """Show any connected device and its firmware version"""
+    from . import session
+    printed = False
+    for details in session.get_all():
+        if not printed:
+            print(" ".join("%-20s" % k for k in details.keys()))
+            printed = True
+        print(" ".join("%-20s" % v for v in details.values()))
+    if not printed:
+        print("No probes are currently connected", file=sys.stderr)
 
 if __name__ == "__main__":
     cli()

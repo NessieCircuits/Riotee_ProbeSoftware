@@ -33,6 +33,9 @@ class RioteeProbe:
         pkt = struct.pack("=B", state)
         return self._session.vendor_cmd(ReqType.ID_DAP_VENDOR_POWER, pkt)
 
+    def gpio_dir(self, pin: int, dir: GpioDir):
+        raise NotImplementedError
+
     def gpio_set(self, pin: int, state: bool):
         raise NotImplementedError
 
@@ -44,7 +47,8 @@ class RioteeProbe:
 
     def fw_version(self) -> str:
         ret = self._session.vendor_cmd(ReqType.ID_DAP_VENDOR_VERSION)
-        return str(ret, encoding="utf-8")
+        # Firmware versions before 1.1.0 send a trailing nul over the wire
+        return str(ret.strip(b"\0"), encoding="utf-8")
 
 
 @contextmanager
