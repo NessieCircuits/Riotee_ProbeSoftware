@@ -31,7 +31,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       - name: Install pip-dependencies 🔧
-        run: pip install build
+        run: pip install flit build
 
       - name: Test-Build package 🧱
         run: python -m build
@@ -39,6 +39,6 @@ jobs:
       - name: Install package 🧱
         run: pip install .
         working-directory: "./tool"
-#      - name: Test package with pytest 🧫
-#        run: pytest
-#        working-directory: "./tool"
+      - name: Test package with pytest 🧫
+        run: pytest
+        working-directory: "./tool"
