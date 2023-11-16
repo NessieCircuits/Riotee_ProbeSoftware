@@ -4,8 +4,14 @@ from enum import Enum
 from typing import Generator
 
 from .protocol import IOSetState, ReqType
-from .session import RioteeProbeSession
+
 from .target import TargetMSP430, TargetNRF52
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    # avoid circular import
+    from .session import RioteeProbeSession
 
 
 class GpioDir(Enum):
@@ -14,7 +20,7 @@ class GpioDir(Enum):
 
 
 class RioteeProbe:
-    def __init__(self, session: RioteeProbeSession) -> None:
+    def __init__(self, session: "RioteeProbeSession") -> None:
         self._session = session
 
     @contextmanager
@@ -47,17 +53,6 @@ class RioteeProbe:
         ret = self._session.vendor_cmd(ReqType.ID_DAP_VENDOR_VERSION)
         # Firmware versions before 1.1.0 send a trailing nul over the wire
         return str(ret.strip(b"\0"), encoding="utf-8")
-
-
-@contextmanager
-def get_connected_probe() -> Generator[RioteeProbe, None, None]:
-    with RioteeProbeSession() as session:
-        if session.product_name == "Riotee Board":
-            yield RioteeProbeBoard(session)
-        elif session.product_name == "Riotee Probe":
-            yield RioteeProbeProbe(session)
-        else:
-            raise Exception(f"Unsupported probe {session.product_name} selected")
 
 
 class RioteeProbeProbe(RioteeProbe):

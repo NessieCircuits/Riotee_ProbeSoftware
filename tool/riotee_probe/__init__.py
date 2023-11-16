@@ -5,7 +5,7 @@ from .probe import RioteeProbeBoard
 from .target import TargetNRF52
 from .target import TargetMSP430
 from .probe import GpioDir
-from .probe import get_connected_probe
+from .session import get_connected_probe
 
 __version__ = "1.1.0"
 

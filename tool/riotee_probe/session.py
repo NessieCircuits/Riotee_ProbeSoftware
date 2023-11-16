@@ -1,3 +1,4 @@
+from contextlib import contextmanager
 from typing import Generator, Optional
 
 from pyocd.core.helpers import ConnectHelper
@@ -5,10 +6,21 @@ from pyocd.core.session import Session
 from typing_extensions import Self
 
 from .protocol import ID_DAP_VENDOR0, DapRetCode
-from .probe import RioteeProbe
+from .probe import RioteeProbe, RioteeProbeBoard, RioteeProbeProbe
 
 
-def get_all_probe_sessions() -> Generator[dict]:
+@contextmanager
+def get_connected_probe() -> Generator[RioteeProbe, None, None]:
+    with RioteeProbeSession() as session:
+        if session.product_name == "Riotee Board":
+            yield RioteeProbeBoard(session)
+        elif session.product_name == "Riotee Probe":
+            yield RioteeProbeProbe(session)
+        else:
+            raise Exception(f"Unsupported probe {session.product_name} selected")
+
+
+def get_all_probe_sessions() -> Generator[dict, None, None]:
     for probe in ConnectHelper.get_all_connected_probes(blocking=False):
         # Similar steps to RioteeProbeSession, may be deduplicated later.
         #
@@ -18,7 +30,7 @@ def get_all_probe_sessions() -> Generator[dict]:
         session = RioteeProbeSession()
         Session.__init__(session, probe, target_override="nrf52")
         session.open(init_board=False)
-
+        print(probe.vendor_name)
         if probe.vendor_name != "Nessie Circuits":
             # Getting the firmware version would fail, as would any get/set pin
             # command -- or worse, it'd do something unexpected.

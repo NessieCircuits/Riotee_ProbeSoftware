@@ -8,11 +8,16 @@ from typing_extensions import Self
 
 from .intelhex import IntelHex16bitReader
 from .protocol import DAP_VENDOR_MAX_PKT_SIZE, ReqType
-from .session import RioteeProbeSession
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    # avoid circular import
+    from .session import RioteeProbeSession
 
 
 class Target:
-    def __init__(self, session: RioteeProbeSession) -> None:
+    def __init__(self, session: "RioteeProbeSession") -> None:
         self._session = session
 
     def __enter__(self) -> Self:

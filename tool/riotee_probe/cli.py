@@ -7,7 +7,7 @@ import click
 from progress.bar import Bar
 
 from .probe import GpioDir
-from .probe import get_connected_probe
+from .session import get_connected_probe
 from .target import Target
 from .session import get_all_probe_sessions
 
@@ -136,11 +136,11 @@ def list() -> None:
     printed = False
     for details in get_all_probe_sessions():
         if not printed:
-            print(" ".join("%-20s" % key for key in details))
+            click.echo(" ".join("%-20s" % key for key in details))
             printed = True
-        print(" ".join("%-20s" % v for v in details.values()))
+        click.echo(" ".join("%-20s" % v for v in details.values()))
     if not printed:
-        print("No probes are currently connected", file=sys.stderr)
+        click.echo("Currently no probes connected", err=True)
 
 
 if __name__ == "__main__":
