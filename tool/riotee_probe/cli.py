@@ -1,4 +1,3 @@
-import sys
 from contextlib import contextmanager
 from pathlib import Path
 from typing import Generator
@@ -6,6 +5,7 @@ from typing import Generator
 import click
 from progress.bar import Bar
 
+from . import __version__
 from .probe import GpioDir
 from .session import get_connected_probe
 from .target import Target
@@ -27,22 +27,26 @@ def get_target(device: str) -> Generator[Target, None, None]:
 
 
 @click.group
-def cli() -> None:
-    pass
+@click.option(
+    "--version",
+    is_flag=True,
+    help="Prints version-info at start (combinable with -v)",
+)
+def cli(version: bool) -> None:
+    if version:
+        click.echo(f"Riotee Probe v{__version__}")
 
 
 @cli.command(short_help="Control power supply bypass (Board only)")
 @click.option("--on/--off", required=True)
-@click.pass_context
-def bypass(ctx: click.Context, on: bool) -> None:
+def bypass(on: bool) -> None:
     with get_connected_probe() as probe:
         probe.bypass(on)
 
 
 @cli.command(short_help="Control target power supply")
 @click.option("--on/--off", required=True)
-@click.pass_context
-def target_power(ctx: click.Context, on: bool) -> None:
+def target_power(on: bool) -> None:
     with get_connected_probe() as probe:
         probe.target_power(on)
 
@@ -51,6 +55,7 @@ def target_power(ctx: click.Context, on: bool) -> None:
 @device_option
 @click.option("-f", "--firmware", type=click.Path(exists=True), required=True)
 def program(device: str, firmware: Path) -> None:
+    # with get_target(device) as target, click.progressbar(length=100, label="Uploading..") as bar:
     with get_target(device) as target:
         bar = Bar("Uploading..", max=100)
 
@@ -87,7 +92,7 @@ def gpio() -> None:
     pass
 
 
-@gpio.command(short_help="Configure GPIO pin direction")
+@gpio.command(name="dir", short_help="Configure GPIO pin direction")
 @click.option("--pin-no", "-p", type=int, required=True, help="Pin number")
 @click.option(
     "--direction",
@@ -96,7 +101,7 @@ def gpio() -> None:
     required=True,
     help="Pin direction",
 )
-def dir(pin_no: int, direction: str) -> None:
+def set_pin_direction(pin_no: int, direction: str) -> None:
     with get_connected_probe() as probe:
         if direction == "in":
             probe.gpio_dir(pin_no, GpioDir.GPIO_DIR_IN)
@@ -104,7 +109,7 @@ def dir(pin_no: int, direction: str) -> None:
             probe.gpio_dir(pin_no, GpioDir.GPIO_DIR_OUT)
 
 
-@gpio.command(short_help="Set GPIO pin")
+@gpio.command(name="set", short_help="Set GPIO pin")
 @click.option("--pin-no", "-p", type=int, required=True, help="Pin number")
 @click.option(
     "--state",
@@ -113,7 +118,7 @@ def dir(pin_no: int, direction: str) -> None:
     required=True,
     help="Pin state",
 )
-def set(pin_no: int, state: str) -> None:
+def set_pin_state(pin_no: int, state: str) -> None:
     with get_connected_probe() as probe:
         if state in ["high", "1"]:
             probe.gpio_set(pin_no, True)
@@ -121,16 +126,16 @@ def set(pin_no: int, state: str) -> None:
             probe.gpio_set(pin_no, False)
 
 
-@gpio.command(short_help="Read GPIO pin")
+@gpio.command(name="get", short_help="Read GPIO pin")
 @click.option("--pin-no", "-p", type=int, required=True, help="Pin number")
-def get(pin_no: int) -> None:
+def get_pin_state(pin_no: int) -> None:
     with get_connected_probe() as probe:
         state = probe.gpio_get(pin_no)
         click.echo(state)
 
 
-@cli.command
-def list() -> None:
+@cli.command(name="list")
+def list_probes() -> None:
     """Show any connected device and its firmware version"""
 
     printed = False
