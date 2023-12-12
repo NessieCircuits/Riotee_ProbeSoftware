@@ -30,7 +30,6 @@ def get_all_probe_sessions() -> Generator[dict, None, None]:
         session = RioteeProbeSession()
         Session.__init__(session, probe, target_override="nrf52")
         session.open(init_board=False)
-        print(probe.vendor_name)
         if probe.vendor_name != "Nessie Circuits":
             # Getting the firmware version would fail, as would any get/set pin
             # command -- or worse, it'd do something unexpected.
@@ -62,6 +61,8 @@ class RioteeProbeSession(Session):
         # Subtract command offset here, will be added again later
         cmd_id = cmd_id - ID_DAP_VENDOR0
         rsp = self.probe._link.vendor(cmd_id, data)
+        if not isinstance(rsp, bytes) or len(rsp) < 1:
+            raise Exception("Probe is unsupported -> try updating firmware")
         if rsp[0] != DapRetCode.DAP_OK:
             raise Exception(f"Probe returned error code {rsp[0]}")
         return bytes(rsp[1:])

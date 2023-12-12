@@ -14,3 +14,6 @@ def test_cli_print_version(
 ) -> None:
     res = cli_runner.invoke(cli, ["--version", "list"])
     assert res.exit_code == 0
+
+
+# TODO: add more tests - but these will need actual hardware
