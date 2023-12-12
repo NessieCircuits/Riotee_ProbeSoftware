@@ -37,7 +37,7 @@ jobs:
         run: python -m build
         working-directory: "./tool"
       - name: Install package 🧱
-        run: pip install .
+        run: pip install .[test]
         working-directory: "./tool"
       - name: Test package with pytest 🧫
         run: pytest
