@@ -1,3 +1,4 @@
+import platform
 from contextlib import contextmanager
 from pathlib import Path
 from typing import Generator
@@ -35,6 +36,9 @@ def get_target(device: str) -> Generator[Target, None, None]:
 def cli(version: bool) -> None:
     if version:
         click.echo(f"Riotee Probe v{__version__}")
+        click.echo(f" -> Python   v{platform.python_version()}")
+        click.echo(f" -> OS       {platform.system()} {platform.release()}, v{platform.version()}")
+        click.echo(f" -> SYS      {platform.machine()} {platform.processor()}")
 
 
 @cli.command(short_help="Control power supply bypass (Board only)")
