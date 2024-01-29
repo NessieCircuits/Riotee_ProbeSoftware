@@ -94,7 +94,7 @@
 #define configTIMER_QUEUE_LENGTH                10
 #define configTIMER_TASK_STACK_DEPTH            1024
 
-/* Interrupt nesting behaviour configuration. */
+/* Interrupt nesting behavior configuration. */
 /*
 #define configKERNEL_INTERRUPT_PRIORITY         [dependent of processor]
 #define configMAX_SYSCALL_INTERRUPT_PRIORITY    [dependent on processor and application]
@@ -136,4 +136,3 @@ to exclude the API function. */
 /* A header file that defines trace macro can be included here. */
 
 #endif /* FREERTOS_CONFIG_H */
-

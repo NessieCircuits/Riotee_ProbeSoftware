@@ -1,12 +1,17 @@
-from enum import Enum
 import struct
 from contextlib import contextmanager
+from enum import Enum
+from typing import Generator
 
-from riotee_probe.protocol import ReqType
-from riotee_probe.protocol import IOSetState
-from riotee_probe.session import RioteeProbeSession
-from riotee_probe.target import TargetNRF52
-from riotee_probe.target import TargetMSP430
+from .protocol import IOSetState, ReqType
+
+from .target import TargetMSP430, TargetNRF52
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    # avoid circular import
+    from .session import RioteeProbeSession
 
 
 class GpioDir(Enum):
@@ -14,28 +19,17 @@ class GpioDir(Enum):
     GPIO_DIR_OUT = 1
 
 
-@contextmanager
-def get_connected_probe():
-    with RioteeProbeSession() as session:
-        if session.product_name == "Riotee Board":
-            yield RioteeProbeBoard(session)
-        elif session.product_name == "Riotee Probe":
-            yield RioteeProbeProbe(session)
-        else:
-            raise Exception(f"Unsupported probe {session.product_name} selected")
-
-
-class RioteeProbe(object):
-    def __init__(self, session):
+class RioteeProbe:
+    def __init__(self, session: "RioteeProbeSession") -> None:
         self._session = session
 
     @contextmanager
-    def msp430(self):
+    def msp430(self) -> Generator[TargetMSP430, None, None]:
         with TargetMSP430(self._session) as msp430:
             yield msp430
 
     @contextmanager
-    def nrf52(self):
+    def nrf52(self) -> Generator[TargetNRF52, None, None]:
         with TargetNRF52(self._session) as nrf52:
             yield nrf52
 
@@ -43,16 +37,16 @@ class RioteeProbe(object):
         pkt = struct.pack("=B", state)
         return self._session.vendor_cmd(ReqType.ID_DAP_VENDOR_POWER, pkt)
 
-    def gpio_dir(self, pin: int, dir: GpioDir):
+    def gpio_dir(self, pin: int, dir: GpioDir) -> None:
         raise NotImplementedError
 
-    def gpio_set(self, pin: int, state: bool):
+    def gpio_set(self, pin: int, state: bool) -> None:
         raise NotImplementedError
 
-    def gpio_get(self, pin: int):
+    def gpio_get(self, pin: int) -> bool:
         raise NotImplementedError
 
-    def bypass(self, state):
+    def bypass(self, state: bool) -> None:
         raise NotImplementedError
 
     def fw_version(self) -> str:
@@ -62,7 +56,7 @@ class RioteeProbe(object):
 
 
 class RioteeProbeProbe(RioteeProbe):
-    def gpio_set(self, pin: int, state: bool):
+    def gpio_set(self, pin: int, state: bool) -> None:
         if state:
             pkt = struct.pack("=BB", pin, IOSetState.IOSET_OUT_HIGH)
         else:
@@ -76,7 +70,7 @@ class RioteeProbeProbe(RioteeProbe):
         rsp = self._session.vendor_cmd(ReqType.ID_DAP_VENDOR_GPIO_GET, pkt)
         return bool(rsp[0])
 
-    def gpio_dir(self, pin: int, dir: GpioDir):
+    def gpio_dir(self, pin: int, dir: GpioDir) -> None:
         if dir == GpioDir.GPIO_DIR_IN:
             pkt = struct.pack("=BB", pin, IOSetState.IOSET_IN)
         else:

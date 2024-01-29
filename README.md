@@ -18,7 +18,7 @@ Download the latest UF2 binaries for the Riotee Board or Riotee Probe from the [
 
 ## Uploading the firmware
 
-To upload the firmware to the Riotee probe or Riotee board, connect a jumper wire from one of the ground pins to the pad labelled 'USB_BOOT' on the bottom of the board, while plugging in the USB cable. A removable storage drive should appear on your PC. Drop the UF2 binary into the drive.
+To upload the firmware to the Riotee probe or Riotee board, connect a jumper wire from one of the ground pins to the pad labeled 'USB_BOOT' on the bottom of the board, while plugging in the USB cable. A removable storage drive should appear on your PC. Drop the UF2 binary into the drive.
 
 ## Installing the command line tool
 
@@ -89,6 +89,9 @@ export PICO_BOARD=riotee_board
 cmake ..
 ```
 
+## Uploading the firmware
+
+To upload the firmware to the Riotee probe or Riotee board, connect a wire from one of the ground pins to the pad labeled 'USB_BOOT' on the bottom of the board, while plugging in the USB cable. A removable storage drive should appear on your PC. Drop a UF2 compatible binary into the drive.
 
 ## USB IDs
 

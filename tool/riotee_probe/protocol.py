@@ -6,9 +6,9 @@ class DapRetCode(IntEnum):
     DAP_ERROR = 0xFF
 
 
-ID_DAP_VENDOR0 = 0x80
+ID_DAP_VENDOR0: int = 0x80
 
-DAP_VENDOR_MAX_PKT_SIZE = 64
+DAP_VENDOR_MAX_PKT_SIZE: int = 64
 
 
 class ReqType(IntEnum):

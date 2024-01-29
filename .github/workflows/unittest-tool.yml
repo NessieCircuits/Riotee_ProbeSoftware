@@ -1,0 +1,44 @@
+# This workflow will install Python dependencies, run tests and lint with a single version of Python
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
+
+name: Unittest Python Tool
+
+on:
+  push:
+  pull_request:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  utest:
+
+    strategy:
+      matrix:
+        os: ["ubuntu-latest", "macos-latest", "windows-latest"]
+        python-version: [ "3.12", "3.10", "3.8" ] # 5 versions / years
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+
+      - name: Checkout 🛎️
+        uses: actions/checkout@v4
+      - name: Set up Python ${{ matrix.python-version }} 🐍
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install pip-dependencies 🔧
+        run: pip install flit build
+
+      - name: Test-Build package 🧱
+        run: python -m build
+        working-directory: "./tool"
+      - name: Install package 🧱
+        run: pip install .[test]
+        working-directory: "./tool"
+      - name: Test package with pytest 🧫
+        run: pytest
+        working-directory: "./tool"

@@ -12,13 +12,28 @@ dependencies = [
     "numpy",
     "intelhex",
     "click>=8.1.0",
-    "pyserial",
+    "pyserial",  # TODO: not used
     "progress",
     "pyocd",
+]
+requires-python = ">=3.8"
+
+[project.optional-dependencies]
+test = [
+    "pytest",
+    "pytest-click",
 ]
 
 [project.scripts]
 riotee-probe = "riotee_probe.cli:cli"
 
+[project.urls]
+Homepage = "https://pypi.org/project/riotee_probe"
+Documentation = "https://www.riotee.nessie-circuits.de"
+Source = "https://github.com/NessieCircuits/Riotee_ProbeSoftware"
+
 [tool.black]
 line-length = 120
+
+[tool.pytest.ini_options]
+addopts = "-vvv"
