@@ -1,4 +1,5 @@
 
+#include <pico/bootrom.h>
 #include <pico/stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -27,6 +28,7 @@ const char version_string[] = "1.1.0";
 #define ID_DAP_VENDOR_GPIO_SET ID_DAP_Vendor9
 #define ID_DAP_VENDOR_GPIO_GET ID_DAP_Vendor10
 #define ID_DAP_VENDOR_BYPASS ID_DAP_Vendor11
+#define ID_DAP_VENDOR_ENTER_BOOTLOADER ID_DAP_Vendor12
 
 static int power_access_cnt = 0;
 static int prog_access_cnt = 0;
@@ -208,6 +210,9 @@ uint32_t DAP_ProcessVendorCommand(const uint8_t *request, uint8_t *response) {
     if (sbw_dev_mem_write(addr, (uint16_t *)&request[6], n_words_w) < 0)
       response[1] = DAP_ERROR;
     gpio_put(PROBE_PIN_LED, !gpio_get(PROBE_PIN_LED));
+    break;
+  case ID_DAP_VENDOR_ENTER_BOOTLOADER:
+    reset_usb_boot(0, 0);
     break;
   default:
     response[0] = ID_DAP_Invalid;
